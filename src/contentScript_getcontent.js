@@ -1,4 +1,5 @@
 import { Readability } from "@mozilla/readability";
+import { querySelectorPromise } from "./utils";
 
 // const CONTEXT_MENU_ID = "summarize-context-menu";
 
@@ -19,9 +20,15 @@ button.style.zIndex = "999999";
 button.style.backgroundColor = "#4CAF50";
 button.style.borderRadius = "5px";
 
-button.addEventListener("click", function () {
+button.addEventListener("click", async function () {
   console.debug("Button clicked");
-  const content = getDocumentContent(document);
+
+  let content = "";
+  if (document.location.origin.includes("youtube.com")) {
+    content = await getYoutubeContent();
+  } else {
+    content = getDocumentContent(document);
+  }
 
   chrome.storage.local.set({ text: content }, function () {
     console.debug("Text is set to " + content);
@@ -38,4 +45,18 @@ function getDocumentContent(doc) {
   var article = new Readability(documentClone).parse();
 
   return article.textContent;
+}
+
+async function getYoutubeContent() {
+  const showTranscriptBtn = document.querySelector(
+    'button[aria-label="Show transcript"]'
+  );
+
+  showTranscriptBtn.click();
+
+  await querySelectorPromise(".segment-text");
+
+  return Array.from(document.querySelectorAll(".segment-text"))
+    .map((el) => el.textContent.trim())
+    .join(" ");
 }
