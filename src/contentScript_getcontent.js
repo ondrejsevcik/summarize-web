@@ -14,6 +14,13 @@ import { Readability } from "@mozilla/readability";
 console.debug("document loaded", document);
 
 var button = document.createElement("button");
+button.style.top = "5px";
+button.style.left = "5px";
+button.style.position = "fixed";
+button.style.zIndex = "999999";
+button.style.backgroundColor = "#4CAF50";
+button.style.borderRadius = "5px";
+
 button.addEventListener("click", function () {
   console.debug("Button clicked");
   const content = getDocumentContent(document);
