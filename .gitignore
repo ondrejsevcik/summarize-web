@@ -8,3 +8,6 @@ Thumbs.db
 
 # Secrets
 .env
+
+# Build related
+dist/
