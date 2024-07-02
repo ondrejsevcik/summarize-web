@@ -13,9 +13,16 @@ chrome.storage.local.get("text", function (data) {
     .then(async (textarea) => {
       changeValue(textarea, prompt);
 
-      const form = await querySelectorPromise("form");
-      let submitButton = form.querySelectorAll("button")[1];
-      submitButton?.click();
+      const submitButton = await querySelectorPromise(
+        "[data-testid=fruitjuice-send-button]"
+      );
+
+      if (!submitButton) {
+        console.error("Submit button not found");
+        return;
+      }
+
+      submitButton.click();
     })
     .catch(console.error);
 });

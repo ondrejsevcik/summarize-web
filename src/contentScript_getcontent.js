@@ -11,8 +11,6 @@ import { Readability } from "@mozilla/readability";
 //   });
 // });
 
-console.debug("document loaded", document);
-
 var button = document.createElement("button");
 button.style.top = "5px";
 button.style.left = "5px";
