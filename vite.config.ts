@@ -6,6 +6,7 @@ function root(...paths: string[]): string {
   return path.resolve(__dirname, ...paths);
 }
 
+// Inspired by https://github.com/aklinker1/vite-plugin-web-extension/tree/main/packages/demo-vanilla
 export default defineConfig({
   root: "src",
   build: {
