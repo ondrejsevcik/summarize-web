@@ -9,13 +9,14 @@
     "128": "icons/icon128.png"
   },
   "permissions": ["contextMenus", "storage", "tabs"],
-  "background": {
-    "service_worker": "background.js"
-  },
   "content_scripts": [
     {
       "matches": ["https://chatgpt.com/*"],
-      "js": ["contentScript.js"]
+      "js": ["contentScript_chatgpt.js"]
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript_getcontent.js"]
     }
   ]
 }
