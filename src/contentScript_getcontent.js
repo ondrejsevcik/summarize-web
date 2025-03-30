@@ -25,15 +25,17 @@ button.addEventListener("click", async function () {
 
   let content = "";
   if (document.location.origin.includes("youtube.com")) {
+    console.debug("Youtube detected");
     content = await getYoutubeContent();
   } else {
+    console.debug("Not Youtube");
     content = getDocumentContent(document);
   }
 
   chrome.storage.local.set({ text: content }, function () {
     console.debug("Text is set to " + content);
 
-    window.open("https://chatgpt.com", "_blank");
+    window.open("https://perplexity.ai", "_blank");
   });
 });
 
@@ -56,7 +58,5 @@ async function getYoutubeContent() {
 
   await querySelectorPromise(".segment-text");
 
-  return Array.from(document.querySelectorAll(".segment-text"))
-    .map((el) => el.textContent.trim())
-    .join(" ");
+  return document.querySelector("ytd-transcript-segment-list-renderer").innerText;
 }

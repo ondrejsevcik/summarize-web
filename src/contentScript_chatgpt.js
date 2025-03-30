@@ -2,6 +2,7 @@ import { querySelectorPromise } from "./utils.js";
 
 chrome.storage.local.get("text", function (data) {
   const text = data.text || "";
+  console.debug('Text retrieved from storage:', text);
   chrome.storage.local.remove("text");
 
   if (!text.trim()) {
@@ -9,15 +10,13 @@ chrome.storage.local.get("text", function (data) {
     return;
   }
 
-  const prompt = `Give me key ideas from this text: ${text}`;
+  const prompt = `Give me key ideas from the text: ${text}`;
 
   querySelectorPromise("textarea")
     .then(async (textarea) => {
       changeValue(textarea, prompt);
 
-      const submitButton = await querySelectorPromise(
-        "[data-testid=fruitjuice-send-button]"
-      );
+      const submitButton = await querySelectorPromise("[aria-label=Submit]");
 
       if (!submitButton) {
         console.error("Submit button not found");
