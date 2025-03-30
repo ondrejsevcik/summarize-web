@@ -15,15 +15,16 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 //   });
 // });
 
-var button = document.createElement("button");
-button.style.top = "5px";
-button.style.left = "5px";
-button.style.position = "fixed";
-button.style.zIndex = "999999";
-button.style.backgroundColor = "#4CAF50";
-button.style.borderRadius = "5px";
+browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.debug('Request Action:', request.action);
+  if (request.action === "ACTION_SUMMARIZE_IN_PERPLEXITY") {
+    TriggerSummarizeInPerplexity();
 
-button.addEventListener("click", async function () {
+    sendResponse({ status: "success" });
+  }
+});
+
+async function TriggerSummarizeInPerplexity() {
   console.debug("Button clicked");
 
   let content = "";
@@ -38,12 +39,11 @@ button.addEventListener("click", async function () {
   browserAPI.storage.local.set({ text: content }, function () {
     console.debug("Text is set to " + content);
 
-    window.open("https://perplexity.ai", "_blank");
+    // Opening a new tab has to be done from
+    // background script due to permission reasons
+    browserAPI.runtime.sendMessage({ action: "openTab", url: "https://perplexity.ai" });
   });
-});
-
-button.innerText = "Summarize in ChatGPT";
-document.body.appendChild(button);
+};
 
 function getDocumentContent(doc) {
   var documentClone = doc.cloneNode(true);
