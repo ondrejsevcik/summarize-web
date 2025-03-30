@@ -1,9 +1,12 @@
 import { querySelectorPromise } from "./utils.js";
 
-chrome.storage.local.get("text", function (data) {
+// Cross-browser compatible approach
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
+browserAPI.storage.local.get("text", function (data) {
   const text = data.text || "";
   console.debug('Text retrieved from storage:', text);
-  chrome.storage.local.remove("text");
+  browserAPI.storage.local.remove("text");
 
   if (!text.trim()) {
     console.debug("No text found in storage");

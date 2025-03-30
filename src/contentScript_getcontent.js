@@ -1,6 +1,9 @@
 import { Readability } from "@mozilla/readability";
 import { querySelectorPromise } from "./utils";
 
+// Cross-browser compatible approach
+const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+
 // const CONTEXT_MENU_ID = "summarize-context-menu";
 
 // chrome.runtime.onInstalled.addListener(() => {
@@ -32,7 +35,7 @@ button.addEventListener("click", async function () {
     content = getDocumentContent(document);
   }
 
-  chrome.storage.local.set({ text: content }, function () {
+  browserAPI.storage.local.set({ text: content }, function () {
     console.debug("Text is set to " + content);
 
     window.open("https://perplexity.ai", "_blank");
