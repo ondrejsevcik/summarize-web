@@ -13,11 +13,16 @@ browserAPI.storage.local.get("text", function (data) {
     return;
   }
 
-  const prompt = `Give me key ideas from the text: ${text}`;
-
   querySelectorPromise("textarea")
     .then(async (textarea) => {
+      const prompt = `Give me key ideas from the attached file`;
       changeValue(textarea, prompt);
+
+      const inputElement = document.querySelector('input[type=file]')
+      simulateFileSelection(inputElement, text, 'content.txt', 'text/plain');
+
+      // Wait 5s for upload
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
       const submitButton = await querySelectorPromise("[aria-label=Submit]");
 
@@ -41,4 +46,21 @@ function changeValue(textarea, value) {
 
   textarea.dispatchEvent(event);
   console.debug("Changed value of textarea");
+}
+
+
+function simulateFileSelection(inputElement, fileContent, fileName, fileType) {
+  // Create a File object
+  const file = new File([fileContent], fileName, { type: fileType });
+  
+  // Create a DataTransfer object and add the file
+  const dataTransfer = new DataTransfer();
+  dataTransfer.items.add(file);
+  
+  // Set the files property on the input element
+  inputElement.files = dataTransfer.files;
+  
+  // Dispatch a change event
+  const event = new Event('change', { bubbles: true });
+  inputElement.dispatchEvent(event);
 }
