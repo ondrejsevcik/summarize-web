@@ -1,10 +1,11 @@
-import { ACTION_SUMMARIZE_TWEET, Tweet } from "./types.js";
+import { ACTION_SUMMARIZE_PAGE, ACTION_SUMMARIZE_TWEET, Page, Tweet } from "./types.js";
 import { querySelectorPromise } from "./utils.js";
 
 // Cross-browser compatible approach
 // @ts-ignore
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
+// Tweet summarization
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Message received in content script:", message);
   console.log("Sender information:", sender);
@@ -26,6 +27,40 @@ Tweet content
 ${tweet.tweetContent}`;
 
       changeValue(textarea, prompt);
+
+      const submitButton = await querySelectorPromise("[aria-label=Submit]");
+      submitButton.click();
+      sendResponse({ status: "success" });
+    })
+    .catch((error) => {
+      console.error(error)
+      sendResponse({ status: "fail" });
+    });
+});
+
+// Page summarization
+browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log("Message received in content script:", message);
+  console.log("Sender information:", sender);
+  
+  // Check the message type/action to determine how to process it
+  if (message.action !== ACTION_SUMMARIZE_PAGE) {
+    return;
+  }
+
+  let pageData = message.data as Page;
+
+  querySelectorPromise("textarea")
+    .then(async (textarea) => {
+        const prompt = `Give me key ides from the attached file.`;
+        changeValue(textarea, prompt);
+
+        const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.content}`;
+        const inputElement = document.querySelector('input[type=file]')
+        simulateFileSelection(inputElement, fileContent, 'content.txt', 'text/plain');
+
+        // Wait 5s for upload
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
       const submitButton = await querySelectorPromise("[aria-label=Submit]");
       submitButton.click();
@@ -77,6 +112,7 @@ ${tweet.tweetContent}`;
 //     .catch(console.error);
 // });
 
+// TODO move to utils
 function changeValue(textarea, value) {
   textarea.value = value;
 
@@ -90,6 +126,7 @@ function changeValue(textarea, value) {
 }
 
 
+// TODO move to utils
 function simulateFileSelection(inputElement, fileContent, fileName, fileType) {
   // Create a File object
   const file = new File([fileContent], fileName, { type: fileType });

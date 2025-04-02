@@ -1,20 +1,10 @@
 import { Readability } from "@mozilla/readability";
 import { querySelectorPromise } from "./utils";
 
+// TODO add youtube support
 // Cross-browser compatible approach
 // @ts-ignore
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
-
-// const CONTEXT_MENU_ID = "summarize-context-menu";
-
-// chrome.runtime.onInstalled.addListener(() => {
-//   console.log("installed context menu");
-//   chrome.contextMenus.create({
-//     id: CONTEXT_MENU_ID,
-//     title: "Summarize in ChatGPT",
-//     contexts: ["selection"],
-//   });
-// });
 
 browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.debug('Request Action:', request.action);

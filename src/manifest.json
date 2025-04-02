@@ -24,7 +24,7 @@
     {
       "matches": ["<all_urls>"],
       "exclude_matches": ["https://chatgpt.com/*", "https://www.perplexity.ai/*"],
-      "js": ["contentScript_getContent.ts"]
+      "js": ["contentScript_pageContent.ts"]
     }
   ]
 }

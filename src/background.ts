@@ -1,4 +1,4 @@
-import { ACTION_SUMMARIZE_TWEET, GET_TWEET_CONTENT, Tweet, TweetActionPayload } from "./types";
+import { ACTION_SUMMARIZE_PAGE, ACTION_SUMMARIZE_TWEET, GET_PAGE_CONTENT, GET_TWEET_CONTENT, Page, PageActionPayload, Tweet, TweetActionPayload } from "./types";
 
 // Cross-browser compatible approach
 // @ts-ignore
@@ -22,8 +22,18 @@ browserAPI.runtime.onInstalled.addListener(function () {
   
 browserAPI.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "summarize-page-in-perplexity") {
-        browserAPI.tabs.sendMessage(tab.id, { action: "ACTION_SUMMARIZE_IN_PERPLEXITY" });
-        return;
+        browserAPI.tabs.sendMessage(tab.id, { action: GET_PAGE_CONTENT })
+          .then(function handleGetPageContentResponse(response: Page) {
+            // Open perplexity website
+            return openAndWaitForComplete("https://www.perplexity.ai/")
+                .then((perplexityTab) => {
+                    // Send the page content to the perplexity tab
+                    browserAPI.tabs.sendMessage(perplexityTab.id, {
+                        action: ACTION_SUMMARIZE_PAGE,
+                        data: response
+                    } satisfies PageActionPayload)
+                })
+          });
     }
 
     if (info.menuItemId === "summarize-tweet-in-perplexity") {
