@@ -1,6 +1,3 @@
-import { Readability } from "@mozilla/readability";
-import { querySelectorPromise } from "./utils";
-
 // Cross-browser compatible approach
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
@@ -35,12 +32,15 @@ async function TriggerSummarizeInPerplexity() {
 };
 
 async function getTweetContent() {
-  const userName = document.querySelector(`[data-testid="User-Name"]`).innerText;
-  const tweetText = document.querySelector(`[data-testid="tweetText"]`).innerText;
+var tweet = document.querySelector('[data-testid="tweet"]')
+var [authorName, handle] = tweet.querySelector(`[data-testid="User-Name"]`).innerText.split(`@`).map(t => t.trim());
+var tweetText = tweet.querySelector(`[data-testid="tweetText"]`)?.innerText ?? '';
+var attachment = tweet.querySelector(`[aria-label="Image"] img`).src
 
-  return `Tweet by:
-${userName}.
+return `Tweet by: ${authorName} @${handle}
 
 Tweet content: 
-${tweetText}`;
+${tweetText}
+
+${attachment ? `Attached image ${attachment}` : ''}`;
 }

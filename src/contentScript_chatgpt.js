@@ -18,7 +18,7 @@ browserAPI.storage.local.get("text", function (data) {
       if (text.startsWith("Tweet")) {
         const prompt = `Explain this tweet
         
-        ${text}`;
+${text}`;
         changeValue(textarea, prompt);
       } else {
         const prompt = `Give me key ideas from the attached file`;
