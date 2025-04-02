@@ -15,14 +15,21 @@ browserAPI.storage.local.get("text", function (data) {
 
   querySelectorPromise("textarea")
     .then(async (textarea) => {
-      const prompt = `Give me key ideas from the attached file`;
-      changeValue(textarea, prompt);
+      if (text.startsWith("Tweet")) {
+        const prompt = `Explain this tweet
+        
+        ${text}`;
+        changeValue(textarea, prompt);
+      } else {
+        const prompt = `Give me key ideas from the attached file`;
+        changeValue(textarea, prompt);
 
-      const inputElement = document.querySelector('input[type=file]')
-      simulateFileSelection(inputElement, text, 'content.txt', 'text/plain');
+        const inputElement = document.querySelector('input[type=file]')
+        simulateFileSelection(inputElement, text, 'content.txt', 'text/plain');
 
-      // Wait 5s for upload
-      await new Promise(resolve => setTimeout(resolve, 5000));
+        // Wait 5s for upload
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
 
       const submitButton = await querySelectorPromise("[aria-label=Submit]");
 

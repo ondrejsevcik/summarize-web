@@ -38,5 +38,9 @@ async function getTweetContent() {
   const userName = document.querySelector(`[data-testid="User-Name"]`).innerText;
   const tweetText = document.querySelector(`[data-testid="tweetText"]`).innerText;
 
-  return `Tweet by ${userName}. Tweet content: ${tweetText}`;
+  return `Tweet by:
+${userName}.
+
+Tweet content: 
+${tweetText}`;
 }
