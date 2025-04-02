@@ -2,6 +2,7 @@ import { Readability } from "@mozilla/readability";
 import { querySelectorPromise } from "./utils";
 
 // Cross-browser compatible approach
+// @ts-ignore
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 // const CONTEXT_MENU_ID = "summarize-context-menu";
