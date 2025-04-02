@@ -1,56 +1,36 @@
 import { Readability } from "@mozilla/readability";
 import { querySelectorPromise } from "./utils";
+import { GET_YOUTUBE_CONTENT, Youtube } from "./types";
 
 // TODO add youtube support
 // Cross-browser compatible approach
 // @ts-ignore
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
-browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   console.debug('Request Action:', request.action);
-  if (request.action === "ACTION_SUMMARIZE_IN_PERPLEXITY") {
-    TriggerSummarizeInPerplexity();
-
-    sendResponse({ status: "success" });
+  if (request.action === GET_YOUTUBE_CONTENT) {
+    // TODO fix me
+    // TODO youtube does not work now!
+    getYoutubeContent().then(response => sendResponse(response));
+    return true; // Keep the message channel open for asynchronous response
   }
 });
 
-async function TriggerSummarizeInPerplexity() {
-  console.debug("Button clicked");
+async function getYoutubeContent(): Promise<Youtube> {
+  const showTranscriptBtn = document.querySelector<HTMLButtonElement>('button[aria-label="Show transcript"]');
+  console.debug('Transcript button:', showTranscriptBtn);
+  // if (!showTranscriptBtn) {
+  //   alert("Transcript button not found. Please check if the transcript is available for this video.");
+  //   throw new Error("Transcript button not found");
+  // }
 
-  let content = "";
-  if (document.location.origin.includes("youtube.com")) {
-    console.debug("Youtube detected");
-    content = await getYoutubeContent();
-  } else {
-    console.debug("Not Youtube");
-    content = getDocumentContent(document);
-  }
-
-  browserAPI.storage.local.set({ text: content }, function () {
-    console.debug("Text is set to " + content);
-
-    // Opening a new tab has to be done from
-    // background script due to permission reasons
-    browserAPI.runtime.sendMessage({ action: "openTab", url: "https://perplexity.ai" });
-  });
-};
-
-function getDocumentContent(doc) {
-  var documentClone = doc.cloneNode(true);
-  var article = new Readability(documentClone).parse();
-
-  return article.textContent;
-}
-
-async function getYoutubeContent() {
-  const showTranscriptBtn = document.querySelector(
-    'button[aria-label="Show transcript"]'
-  );
-
-  showTranscriptBtn.click();
+  showTranscriptBtn?.click();
 
   await querySelectorPromise(".segment-text");
 
-  return document.querySelector("ytd-transcript-segment-list-renderer").innerText;
+  return {
+    title: document.title.replace(" - YouTube", ""),
+    transcript: document.querySelector<HTMLElement>("ytd-transcript-segment-list-renderer")?.innerText ?? '' 
+  }
 }

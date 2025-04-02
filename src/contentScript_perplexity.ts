@@ -1,4 +1,4 @@
-import { ACTION_SUMMARIZE_PAGE, ACTION_SUMMARIZE_TWEET, Page, Tweet } from "./types.js";
+import { ACTION_SUMMARIZE_PAGE, ACTION_SUMMARIZE_TWEET, ACTION_SUMMARIZE_YOUTUBE, Page, Tweet, Youtube } from "./types.js";
 import { querySelectorPromise } from "./utils.js";
 
 // Cross-browser compatible approach
@@ -72,45 +72,39 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
 });
 
-// browserAPI.storage.local.get("text", function (data) {
-//   const text = data.text || "";
-//   console.debug('Text retrieved from storage:', text);
-//   browserAPI.storage.local.remove("text");
+// Youtube summarization
+browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log("Message received in content script:", message);
+  console.log("Sender information:", sender);
+  
+  // Check the message type/action to determine how to process it
+  if (message.action !== ACTION_SUMMARIZE_YOUTUBE) {
+    return;
+  }
 
-//   if (!text.trim()) {
-//     console.debug("No text found in storage");
-//     return;
-//   }
+  let youtubeData = message.data as Youtube;
 
-//   querySelectorPromise("textarea")
-//     .then(async (textarea) => {
-//       if (text.startsWith("Tweet")) {
-//         const prompt = `Explain this tweet
-        
-// ${text}`;
-//         changeValue(textarea, prompt);
-//       } else {
-//         const prompt = `Give me key ideas from the attached file`;
-//         changeValue(textarea, prompt);
+  querySelectorPromise("textarea")
+    .then(async (textarea) => {
+        const prompt = `Give me key ides from the attached YouTube transcript.`;
+        changeValue(textarea, prompt);
 
-//         const inputElement = document.querySelector('input[type=file]')
-//         simulateFileSelection(inputElement, text, 'content.txt', 'text/plain');
+        const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
+        const inputElement = document.querySelector('input[type=file]')
+        simulateFileSelection(inputElement, fileContent, 'content.txt', 'text/plain');
 
-//         // Wait 5s for upload
-//         await new Promise(resolve => setTimeout(resolve, 5000));
-//       }
+        // Wait 5s for upload
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
-//       const submitButton = await querySelectorPromise("[aria-label=Submit]");
-
-//       if (!submitButton) {
-//         console.error("Submit button not found");
-//         return;
-//       }
-
-//       submitButton.click();
-//     })
-//     .catch(console.error);
-// });
+      const submitButton = await querySelectorPromise("[aria-label=Submit]");
+      submitButton.click();
+      sendResponse({ status: "success" });
+    })
+    .catch((error) => {
+      console.error(error)
+      sendResponse({ status: "fail" });
+    });
+});
 
 // TODO move to utils
 function changeValue(textarea, value) {

@@ -22,6 +22,10 @@
       "js": ["contentScript_twitter.ts"]
     },
     {
+      "matches": ["https://youtube.com/*"],
+      "js": ["contentScript_youtube.ts"]
+    },
+    {
       "matches": ["<all_urls>"],
       "exclude_matches": ["https://chatgpt.com/*", "https://www.perplexity.ai/*"],
       "js": ["contentScript_pageContent.ts"]

@@ -1,4 +1,4 @@
-import { ACTION_SUMMARIZE_PAGE, ACTION_SUMMARIZE_TWEET, GET_PAGE_CONTENT, GET_TWEET_CONTENT, Page, PageActionPayload, Tweet, TweetActionPayload } from "./types";
+import { ACTION_SUMMARIZE_PAGE, ACTION_SUMMARIZE_TWEET, ACTION_SUMMARIZE_YOUTUBE, GET_PAGE_CONTENT, GET_TWEET_CONTENT, GET_YOUTUBE_CONTENT, Page, PageActionPayload, Tweet, TweetActionPayload, Youtube, YoutubeActionPayload } from "./types";
 
 // Cross-browser compatible approach
 // @ts-ignore
@@ -17,6 +17,14 @@ browserAPI.runtime.onInstalled.addListener(function () {
         title: "Summarize Tweet in Perplexity",
         contexts: ["page"],
         documentUrlPatterns: ["https://x.com/*"],
+    });
+
+    // Summarize Youtube transcript in perplexity
+    browserAPI.contextMenus.create({
+        id: "summarize-youtube-in-perplexity",
+        title: "Summarize Youtube in Perplexity",
+        contexts: ["page"],
+        documentUrlPatterns: ["https://www.youtube.com/*"],
     });
 });
   
@@ -52,14 +60,26 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
             // and send it instructions to do the stuff once loaded
             .error(console.error)
     }
-});
 
-browserAPI.runtime.onMessage.addListener((message) => {
-    if (message.action === "openTab") {
-        browserAPI.tabs.create({ url: message.url });
+    if (info.menuItemId === "summarize-youtube-in-perplexity") {
+        browserAPI.tabs.sendMessage(tab.id, { action: GET_YOUTUBE_CONTENT })
+            .then(function handleGetYoutubeContentResponse(response: Youtube) {
+                // Open perplexity website
+                return openAndWaitForComplete("https://www.perplexity.ai/")
+                    .then((perplexityTab) => {
+                        // Send the tweet content to the perplexity tab
+                        browserAPI.tabs.sendMessage(perplexityTab.id, {
+                            action: ACTION_SUMMARIZE_YOUTUBE,
+                            data: response
+                        } satisfies YoutubeActionPayload)
+                    })
+            })
+            // and send it instructions to do the stuff once loaded
+            .error(console.error)
     }
 });
 
+// TODO move to utils
 async function openAndWaitForComplete(url: string): Promise<{ id: string }> {
     return new Promise((resolve, reject) => {
         browserAPI.tabs.create({ url }, (openedTab) => {
