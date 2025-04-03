@@ -7,7 +7,7 @@ import { GET_YOUTUBE_CONTENT, Youtube } from "./types";
 // @ts-ignore
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
-browserAPI.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.debug('Request Action:', request.action);
   if (request.action === GET_YOUTUBE_CONTENT) {
     // TODO fix me
@@ -25,6 +25,7 @@ async function getYoutubeContent(): Promise<Youtube> {
   //   throw new Error("Transcript button not found");
   // }
 
+  console.log('clicking btn', showTranscriptBtn)
   showTranscriptBtn?.click();
 
   await querySelectorPromise(".segment-text");
