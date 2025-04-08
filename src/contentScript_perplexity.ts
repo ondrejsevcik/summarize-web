@@ -1,3 +1,4 @@
+import { changeTextareaValue, simulateFileSelection } from "./dom-utils.js";
 import { ACTION_SUMMARIZE_PAGE, ACTION_SUMMARIZE_TWEET, ACTION_SUMMARIZE_YOUTUBE, Page, Tweet, Youtube } from "./types.js";
 import { querySelectorPromise } from "./utils.js";
 
@@ -26,7 +27,7 @@ Tweet author: ${tweet.authorName} @${tweet.authorHandle}
 Tweet content
 ${tweet.tweetContent}`;
 
-      changeValue(textarea, prompt);
+      changeTextareaValue(textarea, prompt);
 
       const submitButton = await querySelectorPromise("[aria-label=Submit]");
       submitButton.click();
@@ -53,10 +54,11 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
   querySelectorPromise("textarea")
     .then(async (textarea) => {
         const prompt = `Give me key ides from the attached file.`;
-        changeValue(textarea, prompt);
+        changeTextareaValue(textarea, prompt);
 
         const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.content}`;
-        const inputElement = document.querySelector('input[type=file]')
+        const inputElement = document.querySelector<HTMLInputElement>('input[type=file]')
+        if (!inputElement) return;
         simulateFileSelection(inputElement, fileContent, 'content.txt', 'text/plain');
 
         // Wait 5s for upload
@@ -87,10 +89,11 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
   querySelectorPromise("textarea")
     .then(async (textarea) => {
         const prompt = `Give me key ides from the attached YouTube transcript.`;
-        changeValue(textarea, prompt);
+        changeTextareaValue(textarea, prompt);
 
         const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
-        const inputElement = document.querySelector('input[type=file]')
+        const inputElement = document.querySelector<HTMLInputElement>('input[type=file]')
+        if (!inputElement) return;
         simulateFileSelection(inputElement, fileContent, 'content.txt', 'text/plain');
 
         // Wait 5s for upload
@@ -106,33 +109,4 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
 });
 
-// TODO move to utils
-function changeValue(textarea, value) {
-  textarea.value = value;
 
-  let event = new Event("input", {
-    bubbles: true,
-    cancelable: true,
-  });
-
-  textarea.dispatchEvent(event);
-  console.debug("Changed value of textarea");
-}
-
-
-// TODO move to utils
-function simulateFileSelection(inputElement, fileContent, fileName, fileType) {
-  // Create a File object
-  const file = new File([fileContent], fileName, { type: fileType });
-  
-  // Create a DataTransfer object and add the file
-  const dataTransfer = new DataTransfer();
-  dataTransfer.items.add(file);
-  
-  // Set the files property on the input element
-  inputElement.files = dataTransfer.files;
-  
-  // Dispatch a change event
-  const event = new Event('change', { bubbles: true });
-  inputElement.dispatchEvent(event);
-}
