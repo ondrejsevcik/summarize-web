@@ -56,7 +56,7 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const prompt = `Give me key ides from the attached file.`;
         changeTextareaValue(textarea, prompt);
 
-        const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.content}`;
+        const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
         const inputElement = document.querySelector<HTMLInputElement>('input[type=file]')
         if (!inputElement) return;
         simulateFileSelection(inputElement, fileContent, 'content.txt', 'text/plain');

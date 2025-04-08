@@ -10,7 +10,7 @@ export const TweetSchema = zod.object({
 
 export const PageContent = zod.object({
     title: zod.string(),
-    content: zod.string(),
+    textContent: zod.string(),
 });
 
 export const YoutubeContent = zod.object({

@@ -18,5 +18,5 @@ function getPageContent(): Page {
   let article = new Readability(documentClone).parse();
 
   // TODO think if this is necessary
-  return article ?? { title: '', content: '' };
+  return article ?? { title: '', textContent: '' };
 }
