@@ -18,6 +18,10 @@
       "js": ["contentScript_perplexity.ts"]
     },
     {
+      "matches": ["https://chatgpt.com/*"],
+      "js": ["contentScript_chatgpt.ts"]
+    },
+    {
       "matches": ["https://x.com/*"],
       "js": ["contentScript_twitter.ts"]
     },
