@@ -58,49 +58,43 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function runTweetSummarization(tweet: Tweet) {
-	const textarea = await querySelectorAsync<HTMLTextAreaElement>("textarea");
-
 	const prompt = `Explain this tweet.
 
 Tweet author: ${tweet.authorName} @${tweet.authorHandle}
 Tweet content
 ${tweet.tweetContent}`;
 
-	changeTextareaValue(textarea, prompt);
+	await changePerplexityTextareaValue(prompt);
 
-	const submitButton = await querySelectorAsync<HTMLButtonElement>(
-		"[aria-label=Submit]",
-	);
-	submitButton.click();
+	await submitPrompt();
 }
 
-// Page summarization
 async function runPageSummarization(pageData: Page) {
-	const textarea = await querySelectorAsync<HTMLTextAreaElement>("textarea");
 	const prompt = "Give me key ideas from the attached file.";
-	changeTextareaValue(textarea, prompt);
+	await changePerplexityTextareaValue(prompt);
 
 	const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
-	const inputElement =
-		document.querySelector<HTMLInputElement>("input[type=file]");
-	assertNonNullish(inputElement, "inputElement is null");
-
-	simulateFileSelection(inputElement, fileContent, "content.txt", "text/plain");
-
-	// Wait for upload
-	await waitForTime(5000);
-
-	const submitButton = await querySelectorAsync<HTMLButtonElement>(
-		"[aria-label=Submit]",
-	);
-	submitButton.click();
+	await uploadFile(fileContent);
+	await submitPrompt();
 }
 
 async function runYoutubeSummarization(youtubeData: Youtube) {
-	const textarea = await querySelectorAsync<HTMLTextAreaElement>("textarea");
 	const prompt = "Give me key ideas from the attached YouTube transcript.";
-	changeTextareaValue(textarea, prompt);
+	await changePerplexityTextareaValue(prompt);
 
+	await disableWebSearch();
+
+	const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
+	await uploadFile(fileContent);
+	await submitPrompt();
+}
+
+async function changePerplexityTextareaValue(value: string) {
+	const textarea = await querySelectorAsync<HTMLTextAreaElement>("textarea");
+	changeTextareaValue(textarea, value);
+}
+
+async function disableWebSearch() {
 	// Find the "set sources for search" button
 	const svgIcon = await querySelectorAsync(".tabler-icon-world");
 	const setSourcesButton = svgIcon.closest<HTMLButtonElement>("button");
@@ -118,17 +112,20 @@ async function runYoutubeSummarization(youtubeData: Youtube) {
 		// Wait for the switch to take effect
 		await waitForTime(300);
 	}
+}
 
-	const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
+async function uploadFile(content: string) {
 	const inputElement =
 		document.querySelector<HTMLInputElement>("input[type=file]");
 
 	assertNonNullish(inputElement, "inputElement is null");
-	simulateFileSelection(inputElement, fileContent, "content.txt", "text/plain");
+	simulateFileSelection(inputElement, content, "content.txt", "text/plain");
 
 	// Wait for upload
 	await waitForTime(5000);
+}
 
+async function submitPrompt() {
 	const submitButton = await querySelectorAsync<HTMLButtonElement>(
 		"[aria-label=Submit]",
 	);
