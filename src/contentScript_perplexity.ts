@@ -1,112 +1,128 @@
 import { changeTextareaValue, simulateFileSelection } from "./dom-utils.js";
-import { ACTION_SUMMARIZE_PAGE, ACTION_SUMMARIZE_TWEET, ACTION_SUMMARIZE_YOUTUBE, Page, Tweet, Youtube } from "./types.js";
+import {
+	ACTION_SUMMARIZE_PAGE,
+	ACTION_SUMMARIZE_TWEET,
+	ACTION_SUMMARIZE_YOUTUBE,
+	type Page,
+	type Tweet,
+	type Youtube,
+} from "./types.js";
 import { querySelectorPromise } from "./utils.js";
 
 // Cross-browser compatible approach
 // @ts-ignore
-const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+const browserAPI = typeof browser !== "undefined" ? browser : chrome;
 
 // Tweet summarization
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("Message received in content script:", message);
-  console.log("Sender information:", sender);
-  
-  // Check the message type/action to determine how to process it
-  if (message.action !== ACTION_SUMMARIZE_TWEET) {
-    return;
-  }
+	console.log("Message received in content script:", message);
+	console.log("Sender information:", sender);
 
-  let tweet = message.data as Tweet;
+	// Check the message type/action to determine how to process it
+	if (message.action !== ACTION_SUMMARIZE_TWEET) {
+		return;
+	}
 
-  querySelectorPromise("textarea")
-    .then(async (textarea) => {
-        const prompt = 
-`Explain this tweet.
+	const tweet = message.data as Tweet;
+
+	querySelectorPromise("textarea")
+		.then(async (textarea) => {
+			const prompt = `Explain this tweet.
 
 Tweet author: ${tweet.authorName} @${tweet.authorHandle}
 Tweet content
 ${tweet.tweetContent}`;
 
-      changeTextareaValue(textarea, prompt);
+			changeTextareaValue(textarea, prompt);
 
-      const submitButton = await querySelectorPromise("[aria-label=Submit]");
-      submitButton.click();
-      sendResponse({ status: "success" });
-    })
-    .catch((error) => {
-      console.error(error)
-      sendResponse({ status: "fail" });
-    });
+			const submitButton = await querySelectorPromise("[aria-label=Submit]");
+			submitButton.click();
+			sendResponse({ status: "success" });
+		})
+		.catch((error) => {
+			console.error(error);
+			sendResponse({ status: "fail" });
+		});
 });
 
 // Page summarization
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("Message received in content script:", message);
-  console.log("Sender information:", sender);
-  
-  // Check the message type/action to determine how to process it
-  if (message.action !== ACTION_SUMMARIZE_PAGE) {
-    return;
-  }
+	console.log("Message received in content script:", message);
+	console.log("Sender information:", sender);
 
-  let pageData = message.data as Page;
+	// Check the message type/action to determine how to process it
+	if (message.action !== ACTION_SUMMARIZE_PAGE) {
+		return;
+	}
 
-  querySelectorPromise("textarea")
-    .then(async (textarea) => {
-        const prompt = `Give me key ides from the attached file.`;
-        changeTextareaValue(textarea, prompt);
+	const pageData = message.data as Page;
 
-        const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
-        const inputElement = document.querySelector<HTMLInputElement>('input[type=file]')
-        if (!inputElement) return;
-        simulateFileSelection(inputElement, fileContent, 'content.txt', 'text/plain');
+	querySelectorPromise("textarea")
+		.then(async (textarea) => {
+			const prompt = "Give me key ideas from the attached file.";
+			changeTextareaValue(textarea, prompt);
 
-        // Wait 5s for upload
-        await new Promise(resolve => setTimeout(resolve, 5000));
+			const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
+			const inputElement =
+				document.querySelector<HTMLInputElement>("input[type=file]");
+			if (!inputElement) return;
+			simulateFileSelection(
+				inputElement,
+				fileContent,
+				"content.txt",
+				"text/plain",
+			);
 
-      const submitButton = await querySelectorPromise("[aria-label=Submit]");
-      submitButton.click();
-      sendResponse({ status: "success" });
-    })
-    .catch((error) => {
-      console.error(error)
-      sendResponse({ status: "fail" });
-    });
+			// Wait 5s for upload
+			await new Promise((resolve) => setTimeout(resolve, 5000));
+
+			const submitButton = await querySelectorPromise("[aria-label=Submit]");
+			submitButton.click();
+			sendResponse({ status: "success" });
+		})
+		.catch((error) => {
+			console.error(error);
+			sendResponse({ status: "fail" });
+		});
 });
 
 // Youtube summarization
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("Message received in content script:", message);
-  console.log("Sender information:", sender);
-  
-  // Check the message type/action to determine how to process it
-  if (message.action !== ACTION_SUMMARIZE_YOUTUBE) {
-    return;
-  }
+	console.log("Message received in content script:", message);
+	console.log("Sender information:", sender);
 
-  let youtubeData = message.data as Youtube;
+	// Check the message type/action to determine how to process it
+	if (message.action !== ACTION_SUMMARIZE_YOUTUBE) {
+		return;
+	}
 
-  querySelectorPromise("textarea")
-    .then(async (textarea) => {
-        const prompt = `Give me key ides from the attached YouTube transcript.`;
-        changeTextareaValue(textarea, prompt);
+	const youtubeData = message.data as Youtube;
 
-        const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
-        const inputElement = document.querySelector<HTMLInputElement>('input[type=file]')
-        if (!inputElement) return;
-        simulateFileSelection(inputElement, fileContent, 'content.txt', 'text/plain');
+	querySelectorPromise("textarea")
+		.then(async (textarea) => {
+			const prompt = "Give me key ideas from the attached YouTube transcript.";
+			changeTextareaValue(textarea, prompt);
 
-        // Wait 5s for upload
-        await new Promise(resolve => setTimeout(resolve, 5000));
+			const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
+			const inputElement =
+				document.querySelector<HTMLInputElement>("input[type=file]");
+			if (!inputElement) return;
+			simulateFileSelection(
+				inputElement,
+				fileContent,
+				"content.txt",
+				"text/plain",
+			);
 
-      const submitButton = await querySelectorPromise("[aria-label=Submit]");
-      submitButton.click();
-      sendResponse({ status: "success" });
-    })
-    .catch((error) => {
-      console.error(error)
-      sendResponse({ status: "fail" });
-    });
+			// Wait 5s for upload
+			await new Promise((resolve) => setTimeout(resolve, 5000));
+
+			const submitButton = await querySelectorPromise("[aria-label=Submit]");
+			submitButton.click();
+			sendResponse({ status: "success" });
+		})
+		.catch((error) => {
+			console.error(error);
+			sendResponse({ status: "fail" });
+		});
 });
-
-
