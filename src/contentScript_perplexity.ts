@@ -128,27 +128,31 @@ async function runYoutubeSummarization(youtubeData: Youtube) {
 	changeTextareaValue(textarea, prompt);
 
 	// Find the "set sources for search" button
-	const [err2, setSourcesButton] = await perform(
-		querySelectorAsync<HTMLElement>(".tabler-icon-world"),
-		// .then((path) =>
-		// 	path.closest("button"),
-		// ),
-	);
+	const [err2, svgIcon] = await perform(querySelectorAsync(".tabler-icon-world"));
 
 	if (err2) {
 		console.error(err2);
 		return;
 	}
 
+	const setSourcesButton = svgIcon.closest<HTMLButtonElement>("button");
+	if (!setSourcesButton) {
+		console.error("Set sources button not found");
+		return;
+	}
+
 	setSourcesButton.click();
 
-	// Wait for the menu to appear
-	await waitForTime(500);
-
 	// Find and click the switch if it's on
-	const switchElement = await querySelectorAsync<HTMLButtonElement>(
-		"button[role='switch']",
-	);
+	const [err3, switchElement] = await perform(querySelectorAsync<HTMLButtonElement>(
+		'button[role="switch"]',
+	));
+
+	if (err3) {
+		console.error(err3);
+		return;
+	}
+
 	if (switchElement && switchElement.getAttribute("aria-checked") === "true") {
 		switchElement.click();
 
