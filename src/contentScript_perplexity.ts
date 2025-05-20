@@ -7,7 +7,7 @@ import {
 	type Tweet,
 	type Youtube,
 } from "./types.js";
-import { querySelectorPromise, waitForTime } from "./utils.js";
+import { querySelectorPromise, waitForTime } from "./utils";
 
 // Cross-browser compatible approach
 // @ts-ignore
@@ -100,15 +100,10 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	const youtubeData = message.data as Youtube;
 
 	querySelectorPromise("textarea")
-		.then(async (textarea) => {
+		.then((textarea) => {
 			const prompt = "Give me key ideas from the attached YouTube transcript.";
 			changeTextareaValue(textarea, prompt);
-
-			const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
-			const inputElement =
-				document.querySelector<HTMLInputElement>("input[type=file]");
-			if (!inputElement) return;
-
+		}).then(async () => {
 			// Find the "set sources for search" button
 			const setSourcesButton = await querySelectorPromise(".tabler-icon-world").then(
 				(path) => path.closest("button"),
@@ -133,6 +128,11 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 					await waitForTime(300);
 				}
 			}
+
+			const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
+			const inputElement =
+				document.querySelector<HTMLInputElement>("input[type=file]");
+			if (!inputElement) return;
 
 			simulateFileSelection(
 				inputElement,

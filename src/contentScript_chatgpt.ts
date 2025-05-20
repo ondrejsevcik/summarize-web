@@ -1,6 +1,5 @@
 import {
 	changeProseMirrorValue,
-	changeTextareaValue,
 	simulateFileSelection,
 } from "./dom-utils.js";
 import {
@@ -10,7 +9,7 @@ import {
 	type Page,
 	type Youtube,
 } from "./types.js";
-import { querySelectorPromise, waitForTime } from "./utils.js";
+import { querySelectorPromise, waitForTime } from "./utils";
 
 // Cross-browser compatible approach
 // @ts-ignore
