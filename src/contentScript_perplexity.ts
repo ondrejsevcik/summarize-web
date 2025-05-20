@@ -7,7 +7,7 @@ import {
 	type Tweet,
 	type Youtube,
 } from "./types.js";
-import { querySelectorPromise } from "./utils.js";
+import { querySelectorPromise, waitForTime } from "./utils.js";
 
 // Cross-browser compatible approach
 // @ts-ignore
@@ -75,7 +75,7 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			);
 
 			// Wait 5s for upload
-			await new Promise((resolve) => setTimeout(resolve, 5000));
+			await waitForTime(5000);
 
 			const submitButton = await querySelectorPromise("[aria-label=Submit]");
 			submitButton.click();
@@ -110,15 +110,15 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			if (!inputElement) return;
 
 			// Find the "set sources for search" button
-      const setSourcesButton = await querySelectorPromise(".tabler-icon-world").then(
-        (path) => path.closest("button"),
-      );
+			const setSourcesButton = await querySelectorPromise(".tabler-icon-world").then(
+				(path) => path.closest("button"),
+			);
 
 			if (setSourcesButton) {
 				setSourcesButton.click();
 
 				// Wait for the menu to appear
-				await new Promise((resolve) => setTimeout(resolve, 500));
+				await waitForTime(500);
 
 				// Find and click the switch if it's on
 				const switchElement = await querySelectorPromise(
@@ -130,7 +130,7 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				) {
 					switchElement.click();
 					// Wait for the switch to take effect
-					await new Promise((resolve) => setTimeout(resolve, 300));
+					await waitForTime(300);
 				}
 			}
 
@@ -142,7 +142,7 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			);
 
 			// Wait 5s for upload
-			await new Promise((resolve) => setTimeout(resolve, 5000));
+			await waitForTime(5000);
 
 			const submitButton = await querySelectorPromise("[aria-label=Submit]");
 			submitButton.click();

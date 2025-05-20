@@ -24,3 +24,7 @@ export function querySelectorPromise(selector, timeout = 500) {
     }, 5000); // Maximum wait for 5 seconds.
   });
 }
+
+export function waitForTime(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}

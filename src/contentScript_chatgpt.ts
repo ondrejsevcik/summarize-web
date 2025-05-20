@@ -10,7 +10,7 @@ import {
 	type Page,
 	type Youtube,
 } from "./types.js";
-import { querySelectorPromise } from "./utils.js";
+import { querySelectorPromise, waitForTime } from "./utils.js";
 
 // Cross-browser compatible approach
 // @ts-ignore
@@ -45,7 +45,7 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			);
 
 			// Wait 5s for upload
-			await new Promise((resolve) => setTimeout(resolve, 5000));
+			await waitForTime(5000);
 
 			const submitButton = document.querySelector<HTMLButtonElement>(
 				"[aria-label='Send prompt']",
@@ -88,7 +88,7 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			);
 
 			// Wait 5s for upload
-			await new Promise((resolve) => setTimeout(resolve, 5000));
+			await waitForTime(5000);
 
 			const submitButton = document.querySelector<HTMLButtonElement>(
 				"[aria-label='Send prompt']",
