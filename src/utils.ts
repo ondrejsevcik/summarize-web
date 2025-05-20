@@ -49,6 +49,7 @@ export async function perform<T>(promise: Promise<T>): Promise<[null, T] | [Erro
 		return [err as Error, null];
 	}
 }
+
 /**
  * Asynchronously waits for an element matching the selector to appear in the DOM.
  * Keeps trying until the element is found or timeout is reached.
