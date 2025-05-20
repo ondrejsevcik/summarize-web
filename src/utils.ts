@@ -1,19 +1,10 @@
 /**
- * Returns a Promise that resolves with the first element found matching the given selector.
- * The function polls the DOM at regular intervals until the element is found or the maximum timeout is reached.
- * 
- * @param selector - The CSS selector string to match elements against
- * @param timeout - The polling interval in milliseconds (default: 500ms)
- * @returns A Promise that resolves with the found DOM element
- * @throws Error if the element is not found within 5 seconds
- * 
- * @example
- * // Find an element with class 'my-element'
- * querySelectorPromise('.my-element')
- *   .then(element => console.log('Found:', element))
- *   .catch(error => console.error(error));
+ * @deprecated This function is deprecated and will be removed in a future version.
  */
-export function querySelectorPromise<E extends Element = Element>(selector: string, timeout = 500) {
+export function querySelectorPromise<E extends Element = Element>(
+	selector: string,
+	timeout = 500,
+) {
 	return new Promise((resolve, reject) => {
 		let intervalId: number | null = null;
 		let timeoutId: number | null = null;
@@ -45,4 +36,17 @@ export function querySelectorPromise<E extends Element = Element>(selector: stri
  */
 export function waitForTime(milliseconds: number) {
 	return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+/**
+ * Awaits a promise and returns a tuple containing either an error or the result.
+ * ```
+ */
+async function to<T>(promise: Promise<T>): Promise<[Error | null, T | null]> {
+	try {
+		const result = await promise;
+		return [null, result];
+	} catch (err) {
+		return [err as Error, null];
+	}
 }
