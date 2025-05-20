@@ -7,7 +7,12 @@ import {
 	type Tweet,
 	type Youtube,
 } from "./types.js";
-import { querySelectorPromise, waitForTime } from "./utils";
+import {
+	perform,
+	querySelectorAsync,
+	querySelectorPromise,
+	waitForTime,
+} from "./utils";
 
 // Cross-browser compatible approach
 // @ts-ignore
@@ -99,53 +104,8 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 	const youtubeData = message.data as Youtube;
 
-	querySelectorPromise("textarea")
-		.then((textarea) => {
-			const prompt = "Give me key ideas from the attached YouTube transcript.";
-			changeTextareaValue(textarea, prompt);
-		}).then(async () => {
-			// Find the "set sources for search" button
-			const setSourcesButton = await querySelectorPromise(".tabler-icon-world").then(
-				(path) => path.closest("button"),
-			);
-
-			if (setSourcesButton) {
-				setSourcesButton.click();
-
-				// Wait for the menu to appear
-				await waitForTime(500);
-
-				// Find and click the switch if it's on
-				const switchElement = await querySelectorPromise(
-					"button[role='switch']",
-				);
-				if (
-					switchElement &&
-					switchElement.getAttribute("aria-checked") === "true"
-				) {
-					switchElement.click();
-					// Wait for the switch to take effect
-					await waitForTime(300);
-				}
-			}
-
-			const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
-			const inputElement =
-				document.querySelector<HTMLInputElement>("input[type=file]");
-			if (!inputElement) return;
-
-			simulateFileSelection(
-				inputElement,
-				fileContent,
-				"content.txt",
-				"text/plain",
-			);
-
-			// Wait 5s for upload
-			await waitForTime(5000);
-
-			const submitButton = await querySelectorPromise("[aria-label=Submit]");
-			submitButton.click();
+	runYoutubeSummarization(youtubeData)
+		.then(() => {
 			sendResponse({ status: "success" });
 		})
 		.catch((error) => {
@@ -153,3 +113,66 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			sendResponse({ status: "fail" });
 		});
 });
+
+async function runYoutubeSummarization(youtubeData: Youtube) {
+	const [err, textarea] = await perform(
+		querySelectorAsync<HTMLTextAreaElement>("textarea"),
+	);
+
+	if (err) {
+		console.error(err);
+		return;
+	}
+
+	const prompt = "Give me key ideas from the attached YouTube transcript.";
+	changeTextareaValue(textarea, prompt);
+
+	// Find the "set sources for search" button
+	const [err2, setSourcesButton] = await perform(
+		querySelectorAsync<HTMLElement>(".tabler-icon-world"),
+		// .then((path) =>
+		// 	path.closest("button"),
+		// ),
+	);
+
+	if (err2) {
+		console.error(err2);
+		return;
+	}
+
+	setSourcesButton.click();
+
+	// Wait for the menu to appear
+	await waitForTime(500);
+
+	// Find and click the switch if it's on
+	const switchElement = await querySelectorAsync<HTMLButtonElement>(
+		"button[role='switch']",
+	);
+	if (switchElement && switchElement.getAttribute("aria-checked") === "true") {
+		switchElement.click();
+
+		// Wait for the switch to take effect
+		await waitForTime(300);
+	}
+
+	const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
+	const inputElement =
+		document.querySelector<HTMLInputElement>("input[type=file]");
+	if (!inputElement) return;
+
+	simulateFileSelection(inputElement, fileContent, "content.txt", "text/plain");
+
+	// Wait 5s for upload
+	await waitForTime(5000);
+
+	const submitButton = await querySelectorAsync<HTMLButtonElement>(
+		"[aria-label=Submit]",
+	);
+	submitButton.click();
+	// })
+	// .catch((error) => {
+	// 	console.error(error);
+	// 	sendResponse({ status: "fail" });
+	// });
+}
