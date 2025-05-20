@@ -13,13 +13,13 @@
  *   .then(element => console.log('Found:', element))
  *   .catch(error => console.error(error));
  */
-export function querySelectorPromise(selector: string, timeout = 500) {
+export function querySelectorPromise<E extends Element = Element>(selector: string, timeout = 500) {
 	return new Promise((resolve, reject) => {
 		let intervalId: number | null = null;
 		let timeoutId: number | null = null;
 
 		const checkElement = () => {
-			const element = document.querySelector(selector);
+			const element = document.querySelector<E>(selector);
 			if (element) {
 				if (intervalId) clearInterval(intervalId);
 				if (timeoutId) clearTimeout(timeoutId);
