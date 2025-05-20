@@ -1,4 +1,3 @@
-import { set } from "zod";
 import { changeTextareaValue, simulateFileSelection } from "./dom-utils.js";
 import {
 	ACTION_SUMMARIZE_PAGE,
@@ -8,13 +7,7 @@ import {
 	type Tweet,
 	type Youtube,
 } from "./types.js";
-import {
-	assertNonNullish,
-	perform,
-	querySelectorAsync,
-	querySelectorPromise,
-	waitForTime,
-} from "./utils";
+import { assertNonNullish, querySelectorAsync, waitForTime } from "./utils";
 
 // Cross-browser compatible approach
 // @ts-ignore
@@ -49,6 +42,19 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				sendResponse({ status: "fail" });
 			});
 	}
+
+	if (message.action === ACTION_SUMMARIZE_PAGE) {
+		const pageData = message.data as Page;
+
+		runPageSummarization(pageData)
+			.then(() => {
+				sendResponse({ status: "success" });
+			})
+			.catch((error) => {
+				console.error(error);
+				sendResponse({ status: "fail" });
+			});
+	}
 });
 
 async function runTweetSummarization(tweet: Tweet) {
@@ -62,51 +68,33 @@ ${tweet.tweetContent}`;
 
 	changeTextareaValue(textarea, prompt);
 
-	const submitButton = await querySelectorAsync<HTMLButtonElement>("[aria-label=Submit]");
+	const submitButton = await querySelectorAsync<HTMLButtonElement>(
+		"[aria-label=Submit]",
+	);
 	submitButton.click();
 }
 
 // Page summarization
-browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	console.log("Message received in content script:", message);
-	console.log("Sender information:", sender);
+async function runPageSummarization(pageData: Page) {
+	const textarea = await querySelectorAsync<HTMLTextAreaElement>("textarea");
+	const prompt = "Give me key ideas from the attached file.";
+	changeTextareaValue(textarea, prompt);
 
-	// Check the message type/action to determine how to process it
-	if (message.action !== ACTION_SUMMARIZE_PAGE) {
-		return;
-	}
+	const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
+	const inputElement =
+		document.querySelector<HTMLInputElement>("input[type=file]");
+	assertNonNullish(inputElement, "inputElement is null");
 
-	const pageData = message.data as Page;
+	simulateFileSelection(inputElement, fileContent, "content.txt", "text/plain");
 
-	querySelectorPromise("textarea")
-		.then(async (textarea) => {
-			const prompt = "Give me key ideas from the attached file.";
-			changeTextareaValue(textarea, prompt);
+	// Wait for upload
+	await waitForTime(5000);
 
-			const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
-			const inputElement =
-				document.querySelector<HTMLInputElement>("input[type=file]");
-			if (!inputElement) return;
-
-			simulateFileSelection(
-				inputElement,
-				fileContent,
-				"content.txt",
-				"text/plain",
-			);
-
-			// Wait 5s for upload
-			await waitForTime(5000);
-
-			const submitButton = await querySelectorPromise("[aria-label=Submit]");
-			submitButton.click();
-			sendResponse({ status: "success" });
-		})
-		.catch((error) => {
-			console.error(error);
-			sendResponse({ status: "fail" });
-		});
-});
+	const submitButton = await querySelectorAsync<HTMLButtonElement>(
+		"[aria-label=Submit]",
+	);
+	submitButton.click();
+}
 
 async function runYoutubeSummarization(youtubeData: Youtube) {
 	const textarea = await querySelectorAsync<HTMLTextAreaElement>("textarea");
