@@ -1,3 +1,4 @@
+import { set } from "zod";
 import { changeTextareaValue, simulateFileSelection } from "./dom-utils.js";
 import {
 	ACTION_SUMMARIZE_PAGE,
@@ -8,6 +9,7 @@ import {
 	type Youtube,
 } from "./types.js";
 import {
+	assertNonNullish,
 	perform,
 	querySelectorAsync,
 	querySelectorPromise,
@@ -115,44 +117,21 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function runYoutubeSummarization(youtubeData: Youtube) {
-	const [err, textarea] = await perform(
-		querySelectorAsync<HTMLTextAreaElement>("textarea"),
-	);
-
-	if (err) {
-		console.error(err);
-		return;
-	}
-
+	const textarea = await querySelectorAsync<HTMLTextAreaElement>("textarea");
 	const prompt = "Give me key ideas from the attached YouTube transcript.";
 	changeTextareaValue(textarea, prompt);
 
 	// Find the "set sources for search" button
-	const [err2, svgIcon] = await perform(querySelectorAsync(".tabler-icon-world"));
-
-	if (err2) {
-		console.error(err2);
-		return;
-	}
-
+	const svgIcon = await querySelectorAsync(".tabler-icon-world");
 	const setSourcesButton = svgIcon.closest<HTMLButtonElement>("button");
-	if (!setSourcesButton) {
-		console.error("Set sources button not found");
-		return;
-	}
 
+	assertNonNullish(setSourcesButton, "setSourcesButton is null");
 	setSourcesButton.click();
 
-	// Find and click the switch if it's on
-	const [err3, switchElement] = await perform(querySelectorAsync<HTMLButtonElement>(
+	// Find and click the "search web" switch is on
+	const switchElement = await querySelectorAsync<HTMLButtonElement>(
 		'button[role="switch"]',
-	));
-
-	if (err3) {
-		console.error(err3);
-		return;
-	}
-
+	);
 	if (switchElement && switchElement.getAttribute("aria-checked") === "true") {
 		switchElement.click();
 
@@ -163,20 +142,15 @@ async function runYoutubeSummarization(youtubeData: Youtube) {
 	const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
 	const inputElement =
 		document.querySelector<HTMLInputElement>("input[type=file]");
-	if (!inputElement) return;
 
+	assertNonNullish(inputElement, "inputElement is null");
 	simulateFileSelection(inputElement, fileContent, "content.txt", "text/plain");
 
-	// Wait 5s for upload
+	// Wait for upload
 	await waitForTime(5000);
 
 	const submitButton = await querySelectorAsync<HTMLButtonElement>(
 		"[aria-label=Submit]",
 	);
 	submitButton.click();
-	// })
-	// .catch((error) => {
-	// 	console.error(error);
-	// 	sendResponse({ status: "fail" });
-	// });
 }

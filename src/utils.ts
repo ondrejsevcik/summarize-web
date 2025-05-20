@@ -106,3 +106,14 @@ export async function querySelectorAsync<E extends Element = Element>(
 	// Race the polling against the timeout - let the error propagate if timeout occurs
 	return await Promise.race<E>([pollingPromise, timeoutPromise]);
 }
+
+
+/**
+ * Asserts that the given value is not null or undefined.
+ * Throws an error with the provided message if the value is nullish.
+ */
+export function assertNonNullish(value: unknown, message: string): asserts value {
+  if (value === null || value === undefined) {
+    throw new Error(message);
+  }
+}
