@@ -20,37 +20,51 @@ import {
 // @ts-ignore
 const browserAPI = typeof browser !== "undefined" ? browser : chrome;
 
-// Tweet summarization
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	console.log("Message received in content script:", message);
-	console.log("Sender information:", sender);
+	console.debug("Message received in content script:", message);
+	console.debug("Sender information:", sender);
 
-	// Check the message type/action to determine how to process it
-	if (message.action !== ACTION_SUMMARIZE_TWEET) {
-		return;
+	if (message.action === ACTION_SUMMARIZE_YOUTUBE) {
+		const youtubeData = message.data as Youtube;
+
+		runYoutubeSummarization(youtubeData)
+			.then(() => {
+				sendResponse({ status: "success" });
+			})
+			.catch((error) => {
+				console.error(error);
+				sendResponse({ status: "fail" });
+			});
 	}
 
-	const tweet = message.data as Tweet;
+	if (message.action === ACTION_SUMMARIZE_TWEET) {
+		const tweet = message.data as Tweet;
 
-	querySelectorPromise("textarea")
-		.then(async (textarea) => {
-			const prompt = `Explain this tweet.
+		runTweetSummarization(tweet)
+			.then(() => {
+				sendResponse({ status: "success" });
+			})
+			.catch((error) => {
+				console.error(error);
+				sendResponse({ status: "fail" });
+			});
+	}
+});
+
+async function runTweetSummarization(tweet: Tweet) {
+	const textarea = await querySelectorAsync<HTMLTextAreaElement>("textarea");
+
+	const prompt = `Explain this tweet.
 
 Tweet author: ${tweet.authorName} @${tweet.authorHandle}
 Tweet content
 ${tweet.tweetContent}`;
 
-			changeTextareaValue(textarea, prompt);
+	changeTextareaValue(textarea, prompt);
 
-			const submitButton = await querySelectorPromise("[aria-label=Submit]");
-			submitButton.click();
-			sendResponse({ status: "success" });
-		})
-		.catch((error) => {
-			console.error(error);
-			sendResponse({ status: "fail" });
-		});
-});
+	const submitButton = await querySelectorAsync<HTMLButtonElement>("[aria-label=Submit]");
+	submitButton.click();
+}
 
 // Page summarization
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -86,28 +100,6 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 			const submitButton = await querySelectorPromise("[aria-label=Submit]");
 			submitButton.click();
-			sendResponse({ status: "success" });
-		})
-		.catch((error) => {
-			console.error(error);
-			sendResponse({ status: "fail" });
-		});
-});
-
-// Youtube summarization
-browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	console.log("Message received in content script:", message);
-	console.log("Sender information:", sender);
-
-	// Check the message type/action to determine how to process it
-	if (message.action !== ACTION_SUMMARIZE_YOUTUBE) {
-		return;
-	}
-
-	const youtubeData = message.data as Youtube;
-
-	runYoutubeSummarization(youtubeData)
-		.then(() => {
 			sendResponse({ status: "success" });
 		})
 		.catch((error) => {
