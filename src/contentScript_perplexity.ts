@@ -73,6 +73,8 @@ async function runPageSummarization(pageData: Page) {
 	const prompt = "Give me key ideas from the attached file.";
 	await changePerplexityTextareaValue(prompt);
 
+	await disableWebSearch();
+
 	const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
 	await uploadFile(fileContent);
 	await submitPrompt();
