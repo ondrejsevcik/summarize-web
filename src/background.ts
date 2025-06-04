@@ -1,5 +1,6 @@
 import {
 	ACTION_SUMMARIZE_PAGE,
+	ACTION_SUMMARIZE_SELECTION,
 	ACTION_SUMMARIZE_TWEET,
 	ACTION_SUMMARIZE_YOUTUBE,
 	FIX_GRAMMAR,
@@ -9,6 +10,7 @@ import {
 	GET_YOUTUBE_CONTENT,
 	type Page,
 	type PageActionPayload,
+	SummarizeSelectionActionPayload,
 	type Tweet,
 	type TweetActionPayload,
 	type Youtube,
@@ -61,6 +63,13 @@ browserAPI.runtime.onInstalled.addListener(() => {
 		title: "Fix grammar in ChatGPT",
 		contexts: ["selection"],
 	});
+
+	// Summarize selection in Perplexity
+	browserAPI.contextMenus.create({
+		id: "summarize-selection-in-perplexity",
+		title: "Summarize selection in Perplexity",
+		contexts: ["selection"],
+	});
 });
 
 browserAPI.contextMenus.onClicked.addListener((info, tab) => {
@@ -79,6 +88,18 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 					},
 				);
 			});
+	}
+
+	if (info.menuItemId === "summarize-selection-in-perplexity") {
+		const selectedText = info.selectionText;
+		openAndWaitForComplete("https://perplexity.ai").then(
+			(targetTab) => {
+				browserAPI.tabs.sendMessage(targetTab.id, {
+					action: ACTION_SUMMARIZE_SELECTION,
+					data: selectedText,
+				} satisfies SummarizeSelectionActionPayload);
+			},
+		);
 	}
 
 	if (info.menuItemId === "summarize-page-in-chatgpt") {

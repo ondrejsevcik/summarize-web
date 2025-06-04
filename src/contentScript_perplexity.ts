@@ -1,6 +1,7 @@
 import { changeTextareaValue, simulateFileSelection } from "./dom-utils.js";
 import {
 	ACTION_SUMMARIZE_PAGE,
+	ACTION_SUMMARIZE_SELECTION,
 	ACTION_SUMMARIZE_TWEET,
 	ACTION_SUMMARIZE_YOUTUBE,
 	type Page,
@@ -55,6 +56,19 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				sendResponse({ status: "fail" });
 			});
 	}
+
+	if (message.action === ACTION_SUMMARIZE_SELECTION) {
+		const selectedText = message.data as string;
+
+		runSummarizeSelection(selectedText)
+			.then(() => {
+				sendResponse({ status: "success" });
+			})
+			.catch((error) => {
+				console.error(error);
+				sendResponse({ status: "fail" });
+			});
+	}
 });
 
 async function runTweetSummarization(tweet: Tweet) {
@@ -77,6 +91,17 @@ async function runPageSummarization(pageData: Page) {
 
 	const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
 	await uploadFile(fileContent);
+
+	await disableWebSearch();
+
+	await submitPrompt();
+}
+
+async function runSummarizeSelection(selectedText: string) {
+	const prompt = "Give me key ideas from the following text:\n" + selectedText;
+	await changePerplexityTextareaValue(prompt);	
+
+	await disableWebSearch();
 	await submitPrompt();
 }
 

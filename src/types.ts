@@ -32,11 +32,13 @@ export const GET_YOUTUBE_CONTENT = "GET_YOUTUBE_CONTENT";
 export const ACTION_SUMMARIZE_TWEET = "ACTION_SUMMARIZE_TWEET";
 export const ACTION_SUMMARIZE_PAGE = "ACTION_SUMMARIZE_PAGE";
 export const ACTION_SUMMARIZE_YOUTUBE = "ACTION_SUMMARIZE_YOUTUBE";
+export const ACTION_SUMMARIZE_SELECTION = "ACTION_SUMMARIZE_SELECTION";
 export const FIX_GRAMMAR = "FIX_GRAMMAR";
 
-type ContentActions = typeof GET_TWEET_CONTENT | typeof GET_PAGE_CONTENT | typeof ACTION_SUMMARIZE_TWEET | typeof ACTION_SUMMARIZE_YOUTUBE;
+type ContentActions = typeof GET_TWEET_CONTENT | typeof GET_PAGE_CONTENT | typeof ACTION_SUMMARIZE_TWEET | typeof ACTION_SUMMARIZE_YOUTUBE | typeof ACTION_SUMMARIZE_SELECTION;
 
 export type TweetActionPayload = { action: "ACTION_SUMMARIZE_TWEET", data: Tweet };
 export type PageActionPayload = { action: "ACTION_SUMMARIZE_PAGE", data: Page };
 export type YoutubeActionPayload = { action: "ACTION_SUMMARIZE_YOUTUBE", data: Youtube };
 export type FixGrammarActionPayload = { action: "FIX_GRAMMAR", data: string };
+export type SummarizeSelectionActionPayload = { action: "ACTION_SUMMARIZE_SELECTION", data: string };
