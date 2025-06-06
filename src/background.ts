@@ -51,81 +51,9 @@ function handleInstallation() {
 	// TODO add summarize selection in ChatGPT
 }
 
-type ContextMenuHandler = Parameters<
-	typeof browser.contextMenus.onClicked.addListener
->[0];
-
-const summarizePageInPerplexity: ContextMenuHandler = (info, tab) => {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const perplexityTab = await openTab("https://www.perplexity.ai/");
-			const perplexityTabId = getTabId(perplexityTab);
-			browser.tabs.sendMessage(perplexityTabId, {
-				action: ACTION_SUMMARIZE_PAGE,
-				payload: PageContent.parse(value),
-			} satisfies PageActionPayload);
-		});
-};
-
-const summarizeSelectionInPerplexity: ContextMenuHandler = async (
-	info,
-	tab,
-) => {
-	const selectedText = info.selectionText ?? "";
-	const perplexityTab = await openTab("https://perplexity.ai");
-	browser.tabs.sendMessage(getTabId(perplexityTab), {
-		action: ACTION_SUMMARIZE_SELECTION,
-		payload: selectedText,
-	} satisfies SummarizeSelectionActionPayload);
-};
-
-const summarizePageInChatGPT: ContextMenuHandler = (info, tab) => {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const chatGPTTab = await openTab("https://chatgpt.com");
-			const chatGPTTabId = getTabId(chatGPTTab);
-			browser.tabs.sendMessage(chatGPTTabId, {
-				action: ACTION_SUMMARIZE_PAGE,
-				payload: PageContent.parse(value),
-			} satisfies PageActionPayload);
-		});
-};
-
-const summarizeYoutubeInPerplexity: ContextMenuHandler = (info, tab) => {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const perplexityTab = await openTab("https://www.perplexity.ai/");
-			const perplexityTabId = getTabId(perplexityTab);
-			browser.tabs.sendMessage(perplexityTabId, {
-				action: ACTION_SUMMARIZE_YOUTUBE,
-				payload: YoutubeContent.parse(value),
-			} satisfies YoutubeActionPayload);
-		});
-};
-
-const summarizeYoutubeInChatGPT: ContextMenuHandler = (info, tab) => {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const chatGPTTab = await openTab("https://chatgpt.com");
-			const chatGPTTabId = getTabId(chatGPTTab);
-			browser.tabs.sendMessage(chatGPTTabId, {
-				action: ACTION_SUMMARIZE_YOUTUBE,
-				payload: YoutubeContent.parse(value),
-			} satisfies YoutubeActionPayload);
-		});
-};
+type Info = browser.Menus.OnClickData;
+type Tab = browser.Tabs.Tab;
+type ContextMenuHandler = (info: Info, tab: Tab) => Promise<unknown>;
 
 const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-page-in-perplexity", summarizePageInPerplexity],
@@ -136,6 +64,80 @@ const actionMap = new Map<string, ContextMenuHandler>([
 ]);
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
-	const handler = actionMap.get(String(info.menuItemId));
+	if (!tab) {
+		throw new Error("Tab is undefined in context menu click handler");
+	}
+
+	const menuItemId = String(info.menuItemId);
+	const handler = actionMap.get(menuItemId);
 	handler?.(info, tab);
 });
+
+async function summarizePageInPerplexity(info: Info, tab: Tab) {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const perplexityTab = await openTab("https://www.perplexity.ai/");
+			const perplexityTabId = getTabId(perplexityTab);
+			browser.tabs.sendMessage(perplexityTabId, {
+				action: ACTION_SUMMARIZE_PAGE,
+				payload: PageContent.parse(value),
+			} satisfies PageActionPayload);
+		});
+}
+
+async function summarizeSelectionInPerplexity(info: Info, tab: Tab) {
+	const selectedText = info.selectionText ?? "";
+	const perplexityTab = await openTab("https://perplexity.ai");
+	browser.tabs.sendMessage(getTabId(perplexityTab), {
+		action: ACTION_SUMMARIZE_SELECTION,
+		payload: selectedText,
+	} satisfies SummarizeSelectionActionPayload);
+}
+
+async function summarizePageInChatGPT(info: Info, tab: Tab) {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const chatGPTTab = await openTab("https://chatgpt.com");
+			const chatGPTTabId = getTabId(chatGPTTab);
+			browser.tabs.sendMessage(chatGPTTabId, {
+				action: ACTION_SUMMARIZE_PAGE,
+				payload: PageContent.parse(value),
+			} satisfies PageActionPayload);
+		});
+}
+
+async function summarizeYoutubeInPerplexity(info: Info, tab: Tab) {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const perplexityTab = await openTab("https://www.perplexity.ai/");
+			const perplexityTabId = getTabId(perplexityTab);
+			browser.tabs.sendMessage(perplexityTabId, {
+				action: ACTION_SUMMARIZE_YOUTUBE,
+				payload: YoutubeContent.parse(value),
+			} satisfies YoutubeActionPayload);
+		});
+}
+
+async function summarizeYoutubeInChatGPT(info: Info, tab: Tab) {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const chatGPTTab = await openTab("https://chatgpt.com");
+			const chatGPTTabId = getTabId(chatGPTTab);
+			browser.tabs.sendMessage(chatGPTTabId, {
+				action: ACTION_SUMMARIZE_YOUTUBE,
+				payload: YoutubeContent.parse(value),
+			} satisfies YoutubeActionPayload);
+		});
+};
