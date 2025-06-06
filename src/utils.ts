@@ -1,3 +1,5 @@
+import browser from "webextension-polyfill";
+
 /**
  * Returns a Promise that resolves after a specified amount of time.
  */
@@ -8,7 +10,9 @@ export function waitForTime(milliseconds: number) {
 /**
  * Awaits a promise and returns a tuple containing either an error or the result.
  */
-export async function perform<T>(promise: Promise<T>): Promise<[null, T] | [Error, null]> {
+export async function perform<T>(
+	promise: Promise<T>,
+): Promise<[null, T] | [Error, null]> {
 	try {
 		const result = await promise;
 		return [null, result];
@@ -74,13 +78,62 @@ export async function querySelectorAsync<E extends Element = Element>(
 	return await Promise.race<E>([pollingPromise, timeoutPromise]);
 }
 
-
 /**
  * Asserts that the given value is not null or undefined.
  * Throws an error with the provided message if the value is nullish.
  */
-export function assertNonNullish(value: unknown, message: string): asserts value {
-  if (value === null || value === undefined) {
-    throw new Error(message);
-  }
+export function assertNonNullish(
+	value: unknown,
+	message: string,
+): asserts value {
+	if (value === null || value === undefined) {
+		throw new Error(message);
+	}
+}
+
+type OnTabUpdatedListener = Parameters<
+	typeof browser.tabs.onUpdated.addListener
+>[0];
+
+/**
+ * Opens a new tab with the specified URL and waits for it to finish loading.
+ *
+ * @returns A promise that resolves to the tab object once loading is complete
+ * @throws Will reject if there's a runtime error during tab creation or loading
+ */
+export async function openTab(url: string): Promise<browser.Tabs.Tab> {
+	return new Promise((resolve, reject) => {
+		browser.tabs.create({ url }).then((openedTab) => {
+			const checkTabLoaded: OnTabUpdatedListener = (
+				tabId,
+				changeInfo,
+				updatedTab,
+			) => {
+				if (browser.runtime.lastError) {
+					return reject(new Error(browser.runtime.lastError.message));
+				}
+
+				if (tabId === openedTab.id && changeInfo.status === "complete") {
+					browser.tabs.onUpdated.removeListener(checkTabLoaded);
+					resolve(updatedTab);
+				}
+			};
+
+			browser.tabs.onUpdated.addListener(checkTabLoaded);
+		});
+	});
+}
+
+/**
+ * Extracts the ID from a browser tab object.
+ *
+ * @returns The numeric ID of the tab
+ * @throws Error if the tab is undefined or doesn't have an ID
+ */
+export function getTabId(tab: browser.Tabs.Tab | undefined): number {
+	if (!tab || !tab.id) {
+		throw new Error("Tab is not available or does not have an ID.");
+	}
+
+	return tab.id;
 }
