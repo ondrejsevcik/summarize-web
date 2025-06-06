@@ -8,9 +8,9 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["contextMenus", "storage", "tabs", "menus"],
+  "permissions": ["contextMenus", "storage", "tabs"],
   "background": {
-    "scripts": ["background.ts"]
+    "service_worker": "background.ts"
   },
   "content_scripts": [
     {
@@ -23,7 +23,6 @@
     },
     {
       "matches": ["<all_urls>"],
-      "exclude_matches": ["https://chatgpt.com/*", "https://www.perplexity.ai/*", "https://youtube.com/*"],
       "js": ["contentScript_pageContent.ts"]
     },
     {
