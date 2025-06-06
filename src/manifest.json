@@ -10,7 +10,9 @@
   },
   "permissions": ["contextMenus", "storage", "tabs"],
   "background": {
-    "service_worker": "background.ts"
+    "__NOTE__": "using both since Firefox and Chrome support different formats",
+    "service_worker": "background.ts",
+    "scripts": ["background.ts"]
   },
   "content_scripts": [
     {
