@@ -1,17 +1,26 @@
 import { querySelectorAsync } from "./utils";
 import { GET_YOUTUBE_CONTENT, type Youtube } from "./types";
+import browser from "webextension-polyfill";
+import { z } from "zod";
 
-// Cross-browser compatible approach
-// @ts-ignore
-const browserAPI = typeof browser !== "undefined" ? browser : chrome;
+browser.runtime.onMessage.addListener(handleMessage);
 
-browserAPI.runtime.onMessage.addListener((request, sender, sendResponse) => {
-	console.debug("Request Action:", request.action);
-	if (request.action === GET_YOUTUBE_CONTENT) {
-		getYoutubeContent().then((response) => sendResponse(response));
-		return true; // Keep the message channel open for asynchronous response
+const MessageSchema = z.object({ action: z.string() });
+
+function handleMessage(message: unknown) {
+	const result = MessageSchema.safeParse(message)
+	if (!result.success) {
+		console.debug("Invalid message format:", result.error.issues);
+		return;
 	}
-});
+
+	const action = result.data.action;
+	console.debug("Request Action:", action);
+
+	if (action === GET_YOUTUBE_CONTENT) {
+		return getYoutubeContent()
+	}
+};
 
 async function getYoutubeContent(): Promise<Youtube> {
 	const showTranscriptBtn = await querySelectorAsync<HTMLButtonElement>(
