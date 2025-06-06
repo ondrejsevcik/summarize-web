@@ -4,14 +4,8 @@ import browser from "webextension-polyfill";
 
 browser.runtime.onMessage.addListener(handleMessage);
 
-function handleMessage(message: unknown) {
-	const result = MessageSchema.safeParse(message);
-	if (!result.success) {
-		console.debug("Invalid message format:", result.error.issues);
-		return;
-	}
-
-	const action = result.data.action;
+async function handleMessage(message: unknown) {
+	const { action } = MessageSchema.parse(message);
 	console.debug("Request Action:", action);
 
 	if (action === GET_YOUTUBE_CONTENT) {
