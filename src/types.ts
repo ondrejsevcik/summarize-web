@@ -1,5 +1,13 @@
 import zod from 'zod';
 
+export const MessageSchema = zod.object({
+    action: zod.string(),
+    // TODO rename to payload
+    data: zod.unknown(),
+});
+
+export type Message = zod.infer<typeof MessageSchema>;
+
 export const TweetSchema = zod.object({
     authorName: zod.string().nonempty(),
     authorHandle: zod.string().nonempty(),
@@ -7,18 +15,20 @@ export const TweetSchema = zod.object({
     imageSrc: zod.string().optional(),
 });
 
+export type Tweet = zod.infer<typeof TweetSchema>;
+
 export const PageContent = zod.object({
     title: zod.string(),
     textContent: zod.string(),
 });
+
+export type Page = zod.infer<typeof PageContent>;
 
 export const YoutubeContent = zod.object({
     title: zod.string(),
     transcript: zod.string(),
 });
 
-export type Tweet = zod.infer<typeof TweetSchema>;
-export type Page = zod.infer<typeof PageContent>;
 export type Youtube = zod.infer<typeof YoutubeContent>;
 
 export const GET_TWEET_CONTENT = "GET_TWEET_CONTENT";
