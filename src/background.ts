@@ -10,7 +10,7 @@ import {
 	GET_YOUTUBE_CONTENT,
 	type Page,
 	type PageActionPayload,
-	SummarizeSelectionActionPayload,
+	type SummarizeSelectionActionPayload,
 	type Tweet,
 	type TweetActionPayload,
 	type Youtube,
@@ -83,7 +83,7 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 						// Send the page content to the perplexity tab
 						browserAPI.tabs.sendMessage(perplexityTab.id, {
 							action: ACTION_SUMMARIZE_PAGE,
-							data: response,
+							payload: response,
 						} satisfies PageActionPayload);
 					},
 				);
@@ -92,14 +92,12 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 
 	if (info.menuItemId === "summarize-selection-in-perplexity") {
 		const selectedText = info.selectionText;
-		openAndWaitForComplete("https://perplexity.ai").then(
-			(targetTab) => {
-				browserAPI.tabs.sendMessage(targetTab.id, {
-					action: ACTION_SUMMARIZE_SELECTION,
-					data: selectedText,
-				} satisfies SummarizeSelectionActionPayload);
-			},
-		);
+		openAndWaitForComplete("https://perplexity.ai").then((targetTab) => {
+			browserAPI.tabs.sendMessage(targetTab.id, {
+				action: ACTION_SUMMARIZE_SELECTION,
+				payload: selectedText,
+			} satisfies SummarizeSelectionActionPayload);
+		});
 	}
 
 	if (info.menuItemId === "summarize-page-in-chatgpt") {
@@ -112,7 +110,7 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 						// Send the page content to the target tab
 						browserAPI.tabs.sendMessage(targetTab.id, {
 							action: ACTION_SUMMARIZE_PAGE,
-							data: response,
+							payload: response,
 						} satisfies PageActionPayload);
 					},
 				);
@@ -129,7 +127,7 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 						// Send the tweet content to the perplexity tab
 						browserAPI.tabs.sendMessage(perplexityTab.id, {
 							action: ACTION_SUMMARIZE_TWEET,
-							data: response,
+							payload: response,
 						} satisfies TweetActionPayload);
 					},
 				);
@@ -148,7 +146,7 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 						// Send the tweet content to the perplexity tab
 						browserAPI.tabs.sendMessage(perplexityTab.id, {
 							action: ACTION_SUMMARIZE_YOUTUBE,
-							data: response,
+							payload: response,
 						} satisfies YoutubeActionPayload);
 					},
 				);
@@ -167,7 +165,7 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 						// Send the tweet content to the target tab tab
 						browserAPI.tabs.sendMessage(targetTab.id, {
 							action: ACTION_SUMMARIZE_YOUTUBE,
-							data: response,
+							payload: response,
 						} satisfies YoutubeActionPayload);
 					},
 				);
@@ -183,7 +181,7 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 			(targetTab) => {
 				browserAPI.tabs.sendMessage(targetTab.id, {
 					action: FIX_GRAMMAR,
-					data: selectedText,
+					payload: selectedText,
 				} satisfies FixGrammarActionPayload);
 			},
 		);

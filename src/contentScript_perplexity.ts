@@ -4,6 +4,7 @@ import {
 	ACTION_SUMMARIZE_SELECTION,
 	ACTION_SUMMARIZE_TWEET,
 	ACTION_SUMMARIZE_YOUTUBE,
+	MessageSchema,
 	PageContent,
 	TweetSchema,
 	YoutubeContent,
@@ -17,8 +18,6 @@ import { z } from "zod";
 
 browser.runtime.onMessage.addListener(handleMessage);
 
-const MessageSchema = z.object({ action: z.string(), data: z.unknown() });
-
 function handleMessage(message: unknown) {
 	const result = MessageSchema.safeParse(message);
 	if (!result.success) {
@@ -26,23 +25,23 @@ function handleMessage(message: unknown) {
 		return;
 	}
 
-	const { action, data } = result.data;
+	const { action, payload } = result.data;
 	console.debug("Request Action:", action);
 
 	if (action === ACTION_SUMMARIZE_YOUTUBE) {
-		return YoutubeContent.parseAsync(data).then(runYoutubeSummarization);
+		return YoutubeContent.parseAsync(payload).then(runYoutubeSummarization);
 	}
 
 	if (action === ACTION_SUMMARIZE_TWEET) {
-		return TweetSchema.parseAsync(data).then(runTweetSummarization);
+		return TweetSchema.parseAsync(payload).then(runTweetSummarization);
 	}
 
 	if (action === ACTION_SUMMARIZE_PAGE) {
-		return PageContent.parseAsync(data).then(runPageSummarization);
+		return PageContent.parseAsync(payload).then(runPageSummarization);
 	}
 
 	if (action === ACTION_SUMMARIZE_SELECTION) {
-		return z.string().parseAsync(data).then(runSummarizeSelection);
+		return z.string().parseAsync(payload).then(runSummarizeSelection);
 	}
 }
 

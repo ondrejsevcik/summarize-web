@@ -1,14 +1,11 @@
 import { querySelectorAsync } from "./utils";
-import { GET_YOUTUBE_CONTENT, type Youtube } from "./types";
+import { GET_YOUTUBE_CONTENT, MessageSchema, type Youtube } from "./types";
 import browser from "webextension-polyfill";
-import { z } from "zod";
 
 browser.runtime.onMessage.addListener(handleMessage);
 
-const MessageSchema = z.object({ action: z.string() });
-
 function handleMessage(message: unknown) {
-	const result = MessageSchema.safeParse(message)
+	const result = MessageSchema.safeParse(message);
 	if (!result.success) {
 		console.debug("Invalid message format:", result.error.issues);
 		return;
@@ -18,9 +15,9 @@ function handleMessage(message: unknown) {
 	console.debug("Request Action:", action);
 
 	if (action === GET_YOUTUBE_CONTENT) {
-		return getYoutubeContent()
+		return getYoutubeContent();
 	}
-};
+}
 
 async function getYoutubeContent(): Promise<Youtube> {
 	const showTranscriptBtn = await querySelectorAsync<HTMLButtonElement>(

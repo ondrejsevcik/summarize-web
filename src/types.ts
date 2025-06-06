@@ -2,8 +2,7 @@ import zod from 'zod';
 
 export const MessageSchema = zod.object({
     action: zod.string(),
-    // TODO rename to payload
-    data: zod.unknown(),
+    payload: zod.unknown(),
 });
 
 export type Message = zod.infer<typeof MessageSchema>;
@@ -41,8 +40,8 @@ export const ACTION_SUMMARIZE_YOUTUBE = "ACTION_SUMMARIZE_YOUTUBE";
 export const ACTION_SUMMARIZE_SELECTION = "ACTION_SUMMARIZE_SELECTION";
 export const FIX_GRAMMAR = "FIX_GRAMMAR";
 
-export type TweetActionPayload = { action: "ACTION_SUMMARIZE_TWEET", data: Tweet };
-export type PageActionPayload = { action: "ACTION_SUMMARIZE_PAGE", data: Page };
-export type YoutubeActionPayload = { action: "ACTION_SUMMARIZE_YOUTUBE", data: Youtube };
-export type FixGrammarActionPayload = { action: "FIX_GRAMMAR", data: string };
-export type SummarizeSelectionActionPayload = { action: "ACTION_SUMMARIZE_SELECTION", data: string };
+export type TweetActionPayload = { action: "ACTION_SUMMARIZE_TWEET", payload: Tweet };
+export type PageActionPayload = { action: "ACTION_SUMMARIZE_PAGE", payload: Page };
+export type YoutubeActionPayload = { action: "ACTION_SUMMARIZE_YOUTUBE", payload: Youtube };
+export type FixGrammarActionPayload = { action: "FIX_GRAMMAR", payload: string };
+export type SummarizeSelectionActionPayload = { action: "ACTION_SUMMARIZE_SELECTION", payload: string };
