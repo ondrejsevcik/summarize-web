@@ -2,14 +2,11 @@ import { changeTextareaValue, simulateFileSelection } from "./dom-utils.js";
 import {
 	ACTION_SUMMARIZE_PAGE,
 	ACTION_SUMMARIZE_SELECTION,
-	ACTION_SUMMARIZE_TWEET,
 	ACTION_SUMMARIZE_YOUTUBE,
 	MessageSchema,
 	PageContent,
-	TweetSchema,
 	YoutubeContent,
 	type Page,
-	type Tweet,
 	type Youtube,
 } from "./types.js";
 import { assertNonNullish, querySelectorAsync, waitForTime } from "./utils";
@@ -32,10 +29,6 @@ function handleMessage(message: unknown) {
 		return YoutubeContent.parseAsync(payload).then(runYoutubeSummarization);
 	}
 
-	if (action === ACTION_SUMMARIZE_TWEET) {
-		return TweetSchema.parseAsync(payload).then(runTweetSummarization);
-	}
-
 	if (action === ACTION_SUMMARIZE_PAGE) {
 		return PageContent.parseAsync(payload).then(runPageSummarization);
 	}
@@ -43,19 +36,6 @@ function handleMessage(message: unknown) {
 	if (action === ACTION_SUMMARIZE_SELECTION) {
 		return z.string().parseAsync(payload).then(runSummarizeSelection);
 	}
-}
-
-async function runTweetSummarization(tweet: Tweet) {
-	const prompt = `Explain this tweet.
-
-Tweet author: ${tweet.authorName} @${tweet.authorHandle}
-Tweet content
-${tweet.tweetContent}`;
-
-	await changePerplexityTextareaValue(prompt);
-	await disableWebSearch();
-
-	await submitPrompt();
 }
 
 async function runPageSummarization(pageData: Page) {

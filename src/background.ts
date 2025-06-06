@@ -1,18 +1,14 @@
 import {
 	ACTION_SUMMARIZE_PAGE,
 	ACTION_SUMMARIZE_SELECTION,
-	ACTION_SUMMARIZE_TWEET,
 	ACTION_SUMMARIZE_YOUTUBE,
 	FIX_GRAMMAR,
 	type FixGrammarActionPayload,
 	GET_PAGE_CONTENT,
-	GET_TWEET_CONTENT,
 	GET_YOUTUBE_CONTENT,
 	type Page,
 	type PageActionPayload,
 	type SummarizeSelectionActionPayload,
-	type Tweet,
-	type TweetActionPayload,
 	type Youtube,
 	type YoutubeActionPayload,
 } from "./types";
@@ -32,14 +28,6 @@ browserAPI.runtime.onInstalled.addListener(() => {
 		id: "summarize-page-in-chatgpt",
 		title: "Summarize page in ChatGPT",
 		contexts: ["page"],
-	});
-
-	// Summarize tweet in perplexity
-	browserAPI.contextMenus.create({
-		id: "summarize-tweet-in-perplexity",
-		title: "Summarize Tweet in Perplexity",
-		contexts: ["page"],
-		documentUrlPatterns: ["https://x.com/*"],
 	});
 
 	// Summarize Youtube transcript in perplexity
@@ -117,25 +105,6 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 			});
 	}
 
-	if (info.menuItemId === "summarize-tweet-in-perplexity") {
-		browserAPI.tabs
-			.sendMessage(tab.id, { action: GET_TWEET_CONTENT })
-			.then(function handleGetTweetContentResponse(response: Tweet) {
-				// Open perplexity website
-				return openAndWaitForComplete("https://www.perplexity.ai/").then(
-					(perplexityTab) => {
-						// Send the tweet content to the perplexity tab
-						browserAPI.tabs.sendMessage(perplexityTab.id, {
-							action: ACTION_SUMMARIZE_TWEET,
-							payload: response,
-						} satisfies TweetActionPayload);
-					},
-				);
-			})
-			// and send it instructions to do the stuff once loaded
-			.error(console.error);
-	}
-
 	if (info.menuItemId === "summarize-youtube-in-perplexity") {
 		browserAPI.tabs
 			.sendMessage(tab.id, { action: GET_YOUTUBE_CONTENT })
@@ -143,7 +112,6 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 				// Open perplexity website
 				return openAndWaitForComplete("https://www.perplexity.ai/").then(
 					(perplexityTab) => {
-						// Send the tweet content to the perplexity tab
 						browserAPI.tabs.sendMessage(perplexityTab.id, {
 							action: ACTION_SUMMARIZE_YOUTUBE,
 							payload: response,
@@ -162,7 +130,6 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 				// Open ChatGPT website
 				return openAndWaitForComplete("https://chatgpt.com").then(
 					(targetTab) => {
-						// Send the tweet content to the target tab tab
 						browserAPI.tabs.sendMessage(targetTab.id, {
 							action: ACTION_SUMMARIZE_YOUTUBE,
 							payload: response,
