@@ -9,7 +9,7 @@ import {
 
 browser.runtime.onMessage.addListener(handleMessage);
 
-async function handleMessage(message: unknown) {
+function handleMessage(message: unknown) {
 	const { action } = MessageSchema.parse(message);
 	console.debug("Request Action:", action);
 

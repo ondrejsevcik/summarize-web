@@ -13,7 +13,7 @@ import browser from "webextension-polyfill";
 
 browser.runtime.onMessage.addListener(handleMessage);
 
-async function handleMessage(message: unknown) {
+function handleMessage(message: unknown) {
 	const { action, payload } = MessageSchema.parse(message);
 	console.debug("Request Action:", action);
 
