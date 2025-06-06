@@ -1,4 +1,4 @@
-import { changeProseMirrorValue, simulateFileSelection } from "./dom-utils.js";
+import { simulateFileSelection } from "./dom-utils.js";
 import {
 	ACTION_SUMMARIZE_PAGE,
 	ACTION_SUMMARIZE_YOUTUBE,
@@ -8,7 +8,7 @@ import {
 	type Page,
 	type Youtube,
 } from "./types.js";
-import { querySelectorPromise, waitForTime } from "./utils";
+import { querySelectorAsync, waitForTime } from "./utils";
 import browser from "webextension-polyfill";
 
 browser.runtime.onMessage.addListener(handleMessage);
@@ -27,54 +27,49 @@ async function handleMessage(message: unknown) {
 }
 
 async function runPageSummarization(pageData: Page) {
-	return querySelectorPromise(".ProseMirror").then(async (textarea) => {
-		const prompt =
-			"Extract the essential ideas from this text, organizing them by importance (main concepts → supporting points). Preserve logical connections between ideas and include just enough context to ensure understanding. Format your response for both quick scanning and deeper comprehension.";
-		changeProseMirrorValue(textarea, prompt);
+	const prompt =
+		"Extract the essential ideas from this text, organizing them by importance (main concepts → supporting points). Preserve logical connections between ideas and include just enough context to ensure understanding. Format your response for both quick scanning and deeper comprehension.";
+	await updateEditorValue(prompt);
 
-		const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
-		const inputElement =
-			document.querySelector<HTMLInputElement>("input[type=file]");
-		if (!inputElement) return;
-		simulateFileSelection(
-			inputElement,
-			fileContent,
-			"content.txt",
-			"text/plain",
-		);
+	const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
+	await uploadFile(fileContent);
 
-		// Wait 5s for upload
-		await waitForTime(5000);
-
-		const submitButton = document.querySelector<HTMLButtonElement>(
-			"[aria-label='Send prompt']",
-		);
-		submitButton?.click();
-	});
+	// Wait for upload
+	await waitForTime(5000);
+	await submitButton();
 }
 
 async function runYoutubeSummarization(youtubeData: Youtube) {
-	return querySelectorPromise(".ProseMirror").then(async (textarea) => {
-		const prompt = "Give me key ideas from the attached YouTube transcript.";
-		changeProseMirrorValue(textarea, prompt);
+	const prompt = "Give me key ideas from the attached YouTube transcript.";
+	await updateEditorValue(prompt);
 
-		const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
-		const inputElement =
-			document.querySelector<HTMLInputElement>("input[type=file]");
-		if (!inputElement) return;
-		simulateFileSelection(
-			inputElement,
-			fileContent,
-			"content.txt",
-			"text/plain",
-		);
+	const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
+	await uploadFile(fileContent);
 
-		// Wait 5s for upload
-		await waitForTime(5000);
+	// Wait for upload
+	await waitForTime(5000);
+	await submitButton();
+}
 
-		const submitButton = document.querySelector<HTMLButtonElement>(
-			"[aria-label='Send prompt']",
-		);
-		submitButton?.click();
-	});
+async function updateEditorValue(value: string) {
+	const editorElement =
+		await querySelectorAsync<HTMLDivElement>(".ProseMirror");
+
+	// This updates value in the ProseMirror editor
+	editorElement.textContent = value;
+	const event = new Event("input", { bubbles: true, cancelable: true });
+	editorElement.dispatchEvent(event);
+}
+
+async function uploadFile(fileContent: string) {
+	const inputElement =
+		await querySelectorAsync<HTMLInputElement>("input[type=file]");
+	simulateFileSelection(inputElement, fileContent, "content.txt", "text/plain");
+}
+
+async function submitButton() {
+	const submitButton = await querySelectorAsync<HTMLButtonElement>(
+		"[aria-label='Send prompt']",
+	);
+	submitButton.click();
 }

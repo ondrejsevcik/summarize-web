@@ -34,14 +34,3 @@ export function simulateFileSelection(
 	inputElement.dispatchEvent(event);
 }
 
-export function changeProseMirrorValue(
-	editorElement: HTMLElement,
-	value: string,
-) {
-	editorElement.textContent = value;
-
-	const event = new Event("input", { bubbles: true, cancelable: true });
-	editorElement.dispatchEvent(event);
-
-	console.debug("Changed value of ProseMirror editor using plain DOM.");
-}
