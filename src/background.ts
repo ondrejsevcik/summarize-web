@@ -48,7 +48,11 @@ function handleInstallation() {
 		contexts: ["selection"],
 	});
 
-	// TODO add summarize selection in ChatGPT
+	browser.contextMenus.create({
+		id: "summarize-selection-in-chatgpt",
+		title: "Summarize selection in ChatGPT",
+		contexts: ["selection"],
+	});
 }
 
 type Info = browser.Menus.OnClickData;
@@ -56,8 +60,9 @@ type Tab = browser.Tabs.Tab;
 type ContextMenuHandler = (info: Info, tab: Tab) => Promise<unknown>;
 
 const actionMap = new Map<string, ContextMenuHandler>([
-	["summarize-page-in-perplexity", summarizePageInPerplexity],
 	["summarize-selection-in-perplexity", summarizeSelectionInPerplexity],
+	["summarize-selection-in-chatgpt", summarizeSelectionInChatGPT],
+	["summarize-page-in-perplexity", summarizePageInPerplexity],
 	["summarize-page-in-chatgpt", summarizePageInChatGPT],
 	["summarize-youtube-in-perplexity", summarizeYoutubeInPerplexity],
 	["summarize-youtube-in-chatgpt", summarizeYoutubeInChatGPT],
@@ -92,6 +97,15 @@ async function summarizeSelectionInPerplexity(info: Info, tab: Tab) {
 	const selectedText = info.selectionText ?? "";
 	const perplexityTab = await openTab("https://perplexity.ai");
 	browser.tabs.sendMessage(getTabId(perplexityTab), {
+		action: ACTION_SUMMARIZE_SELECTION,
+		payload: selectedText,
+	} satisfies SummarizeSelectionActionPayload);
+}
+
+async function summarizeSelectionInChatGPT(info: Info, tab: Tab) {
+	const selectedText = info.selectionText ?? "";
+	const openedTab = await openTab("https://chatgpt.com");
+	browser.tabs.sendMessage(getTabId(openedTab), {
 		action: ACTION_SUMMARIZE_SELECTION,
 		payload: selectedText,
 	} satisfies SummarizeSelectionActionPayload);
@@ -140,4 +154,4 @@ async function summarizeYoutubeInChatGPT(info: Info, tab: Tab) {
 				payload: YoutubeContent.parse(value),
 			} satisfies YoutubeActionPayload);
 		});
-};
+}

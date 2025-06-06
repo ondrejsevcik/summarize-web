@@ -1,6 +1,8 @@
+import { z } from "zod";
 import { simulateFileSelection } from "./dom-utils.js";
 import {
 	ACTION_SUMMARIZE_PAGE,
+	ACTION_SUMMARIZE_SELECTION,
 	ACTION_SUMMARIZE_YOUTUBE,
 	MessageSchema,
 	PageContent,
@@ -23,6 +25,10 @@ function handleMessage(message: unknown) {
 
 	if (action === ACTION_SUMMARIZE_YOUTUBE) {
 		return YoutubeContent.parseAsync(payload).then(runYoutubeSummarization);
+	}
+
+	if (action === ACTION_SUMMARIZE_SELECTION) {
+		return z.string().parseAsync(payload).then(runSummarizeSelection);
 	}
 }
 
@@ -48,6 +54,12 @@ async function runYoutubeSummarization(youtubeData: Youtube) {
 
 	// Wait for upload
 	await waitForTime(5000);
+	await submitButton();
+}
+
+async function runSummarizeSelection(selectedText: string) {
+	const prompt = `Give me key ideas from the following text:\n${selectedText}`;
+	await updateEditorValue(prompt);
 	await submitButton();
 }
 
