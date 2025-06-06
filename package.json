@@ -16,5 +16,9 @@
   },
   "engines": {
     "node": ">=22.14.0"
+  },
+  "devDependencies": {
+    "@types/webextension-polyfill": "^0.12.3",
+    "webextension-polyfill": "^0.12.0"
   }
 }
