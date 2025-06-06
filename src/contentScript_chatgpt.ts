@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { simulateFileSelection } from "./dom-utils.js";
+import { simulateFileSelection } from "./dom-utils";
 import {
 	ACTION_SUMMARIZE_PAGE,
 	ACTION_SUMMARIZE_SELECTION,
@@ -9,7 +9,7 @@ import {
 	YoutubeContent,
 	type Page,
 	type Youtube,
-} from "./types.js";
+} from "./types";
 import { querySelectorAsync, waitForTime } from "./utils";
 import browser from "webextension-polyfill";
 

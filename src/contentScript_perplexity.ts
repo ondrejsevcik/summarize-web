@@ -1,4 +1,4 @@
-import { changeTextareaValue, simulateFileSelection } from "./dom-utils.js";
+import { changeTextareaValue, simulateFileSelection } from "./dom-utils";
 import {
 	ACTION_SUMMARIZE_PAGE,
 	ACTION_SUMMARIZE_SELECTION,
@@ -8,7 +8,7 @@ import {
 	YoutubeContent,
 	type Page,
 	type Youtube,
-} from "./types.js";
+} from "./types";
 import { assertNonNullish, querySelectorAsync, waitForTime } from "./utils";
 import browser from "webextension-polyfill";
 import { z } from "zod";
