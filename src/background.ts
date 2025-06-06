@@ -4,79 +4,102 @@ import {
 	ACTION_SUMMARIZE_YOUTUBE,
 	GET_PAGE_CONTENT,
 	GET_YOUTUBE_CONTENT,
+	PageContent,
 	type Page,
 	type PageActionPayload,
 	type SummarizeSelectionActionPayload,
 	type Youtube,
 	type YoutubeActionPayload,
 } from "./types";
+import browser from "webextension-polyfill";
 
-// Cross-browser compatible approach
-// @ts-ignore
-const browserAPI = typeof browser !== "undefined" ? browser : chrome;
+browser.runtime.onInstalled.addListener(handleInstallation);
 
-browserAPI.runtime.onInstalled.addListener(() => {
-	browserAPI.contextMenus.create({
+function handleInstallation() {
+	browser.contextMenus.create({
 		id: "summarize-page-in-perplexity",
 		title: "Summarize page in Perplexity",
 		contexts: ["page"],
 	});
 
-	browserAPI.contextMenus.create({
+	browser.contextMenus.create({
 		id: "summarize-page-in-chatgpt",
 		title: "Summarize page in ChatGPT",
 		contexts: ["page"],
 	});
 
-	// Summarize Youtube transcript in perplexity
-	browserAPI.contextMenus.create({
+	browser.contextMenus.create({
 		id: "summarize-youtube-in-perplexity",
 		title: "Summarize Youtube in Perplexity",
 		contexts: ["page"],
 		documentUrlPatterns: ["https://www.youtube.com/*"],
 	});
 
-	browserAPI.contextMenus.create({
+	browser.contextMenus.create({
 		id: "summarize-youtube-in-chatgpt",
 		title: "Summarize Youtube in ChatGPT",
 		contexts: ["page"],
 		documentUrlPatterns: ["https://www.youtube.com/*"],
 	});
 
-	browserAPI.contextMenus.create({
+	browser.contextMenus.create({
 		id: "summarize-selection-in-perplexity",
 		title: "Summarize selection in Perplexity",
 		contexts: ["selection"],
 	});
-});
 
-browserAPI.contextMenus.onClicked.addListener((info, tab) => {
-	if (info.menuItemId === "summarize-page-in-perplexity") {
-		browserAPI.tabs
-			.sendMessage(tab.id, { action: GET_PAGE_CONTENT })
-			.then(function handleGetPageContentResponse(response: Page) {
-				// Open perplexity website
-				return openAndWaitForComplete("https://www.perplexity.ai/").then(
-					(perplexityTab) => {
-						// Send the page content to the perplexity tab
-						browserAPI.tabs.sendMessage(perplexityTab.id, {
-							action: ACTION_SUMMARIZE_PAGE,
-							payload: response,
-						} satisfies PageActionPayload);
-					},
-				);
-			});
+	// TODO add summarize selection in ChatGPT
+}
+
+function getTabId(tab: browser.Tabs.Tab | undefined): number {
+	if (!tab || !tab.id) {
+		throw new Error("Tab is not available or does not have an ID.");
 	}
 
-	if (info.menuItemId === "summarize-selection-in-perplexity") {
-		const selectedText = info.selectionText;
-		openAndWaitForComplete("https://perplexity.ai").then((targetTab) => {
-			browserAPI.tabs.sendMessage(targetTab.id, {
-				action: ACTION_SUMMARIZE_SELECTION,
-				payload: selectedText,
-			} satisfies SummarizeSelectionActionPayload);
+	return tab.id;
+}
+
+type ContextMenuHandler = Parameters<
+	typeof browser.contextMenus.onClicked.addListener
+>[0];
+
+const summarizePageInPerplexity: ContextMenuHandler = (info, tab) => {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const perplexityTab = await openAndWaitForComplete(
+				"https://www.perplexity.ai/",
+			);
+			const perplexityTabId = getTabId(perplexityTab);
+			browser.tabs.sendMessage(perplexityTabId, {
+				action: ACTION_SUMMARIZE_PAGE,
+				payload: PageContent.parse(value),
+			} satisfies PageActionPayload);
 		});
-	}
+};
+
+const summarizeSelectionInPerplexity: ContextMenuHandler = async (
+	info,
+	tab,
+) => {
+	const selectedText = info.selectionText ?? "";
+	const perplexityTab = await openAndWaitForComplete("https://perplexity.ai");
+	browser.tabs.sendMessage(getTabId(perplexityTab), {
+		action: ACTION_SUMMARIZE_SELECTION,
+		payload: selectedText,
+	} satisfies SummarizeSelectionActionPayload);
+};
+
+const actionMap = new Map<string, ContextMenuHandler>([
+	["summarize-page-in-perplexity", summarizePageInPerplexity],
+	["summarize-selection-in-perplexity", summarizeSelectionInPerplexity],
+]);
+
+browser.contextMenus.onClicked.addListener((info, tab) => {
+	const handler = actionMap.get(String(info.menuItemId));
+	handler?.(info, tab);
 
 	if (info.menuItemId === "summarize-page-in-chatgpt") {
 		browserAPI.tabs
@@ -132,14 +155,21 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 	}
 });
 
+type OnTabUpdatedListener = Parameters<
+	typeof browser.tabs.onUpdated.addListener
+>[0];
+
 // TODO move to utils
-async function openAndWaitForComplete(url: string): Promise<{ id: string }> {
+async function openAndWaitForComplete(url: string): Promise<browser.Tabs.Tab> {
 	return new Promise((resolve, reject) => {
-		browserAPI.tabs.create({ url }, (openedTab) => {
-			// Function to check if this tab is complete
-			function checkTabLoaded(tabId, changeInfo, updatedTab) {
-				if (browserAPI.runtime.lastError) {
-					return reject(new Error(browserAPI.runtime.lastError.message));
+		browser.tabs.create({ url }).then((openedTab) => {
+			const checkTabLoaded: OnTabUpdatedListener = (
+				tabId,
+				changeInfo,
+				updatedTab,
+			) => {
+				if (browser.runtime.lastError) {
+					return reject(new Error(browser.runtime.lastError.message));
 				}
 
 				// Make sure we're looking at the right tab
@@ -150,15 +180,15 @@ async function openAndWaitForComplete(url: string): Promise<{ id: string }> {
 				// If the tab is fully loaded
 				if (changeInfo.status === "complete") {
 					// Remove the event listener to avoid memory leaks
-					browserAPI.tabs.onUpdated.removeListener(checkTabLoaded);
+					browser.tabs.onUpdated.removeListener(checkTabLoaded);
 
 					// Resolve the promise with the updated tab
 					resolve(updatedTab);
 				}
-			}
+			};
 
 			// Add the listener for tab updates
-			browserAPI.tabs.onUpdated.addListener(checkTabLoaded);
+			browser.tabs.onUpdated.addListener(checkTabLoaded);
 		});
 	});
 }
