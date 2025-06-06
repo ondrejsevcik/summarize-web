@@ -15,14 +15,8 @@ import { z } from "zod";
 
 browser.runtime.onMessage.addListener(handleMessage);
 
-function handleMessage(message: unknown) {
-	const result = MessageSchema.safeParse(message);
-	if (!result.success) {
-		console.debug("Invalid message format:", result.error.issues);
-		return;
-	}
-
-	const { action, payload } = result.data;
+async function handleMessage(message: unknown) {
+	const { action, payload } = MessageSchema.parse(message);
 	console.debug("Request Action:", action);
 
 	if (action === ACTION_SUMMARIZE_YOUTUBE) {
