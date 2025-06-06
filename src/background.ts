@@ -5,10 +5,9 @@ import {
 	GET_PAGE_CONTENT,
 	GET_YOUTUBE_CONTENT,
 	PageContent,
-	type Page,
+	YoutubeContent,
 	type PageActionPayload,
 	type SummarizeSelectionActionPayload,
-	type Youtube,
 	type YoutubeActionPayload,
 } from "./types";
 import browser from "webextension-polyfill";
@@ -92,67 +91,62 @@ const summarizeSelectionInPerplexity: ContextMenuHandler = async (
 	} satisfies SummarizeSelectionActionPayload);
 };
 
+const summarizePageInChatGPT: ContextMenuHandler = (info, tab) => {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const chatGPTTab = await openAndWaitForComplete("https://chatgpt.com");
+			const chatGPTTabId = getTabId(chatGPTTab);
+			browser.tabs.sendMessage(chatGPTTabId, {
+				action: ACTION_SUMMARIZE_PAGE,
+				payload: PageContent.parse(value),
+			} satisfies PageActionPayload);
+		});
+};
+
+const summarizeYoutubeInPerplexity: ContextMenuHandler = (info, tab) => {
+	const tabId = getTabId(tab);
+	
+	browser.tabs
+		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const perplexityTab = await openAndWaitForComplete("https://www.perplexity.ai/");
+			const perplexityTabId = getTabId(perplexityTab);
+			browser.tabs.sendMessage(perplexityTabId, {
+				action: ACTION_SUMMARIZE_YOUTUBE,
+				payload: YoutubeContent.parse(value),
+			} satisfies YoutubeActionPayload);
+		});
+};
+
+const summarizeYoutubeInChatGPT: ContextMenuHandler = (info, tab) => {
+	const tabId = getTabId(tab);
+	
+	browser.tabs
+		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const chatGPTTab = await openAndWaitForComplete("https://chatgpt.com");
+			const chatGPTTabId = getTabId(chatGPTTab);
+			browser.tabs.sendMessage(chatGPTTabId, {
+				action: ACTION_SUMMARIZE_YOUTUBE,
+				payload: YoutubeContent.parse(value),
+			} satisfies YoutubeActionPayload);
+		});
+};
+
 const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-page-in-perplexity", summarizePageInPerplexity],
 	["summarize-selection-in-perplexity", summarizeSelectionInPerplexity],
+	['summarize-page-in-chatgpt', summarizePageInChatGPT],
+	['summarize-youtube-in-perplexity', summarizeYoutubeInPerplexity],
+	['summarize-youtube-in-chatgpt', summarizeYoutubeInChatGPT],
 ]);
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
 	const handler = actionMap.get(String(info.menuItemId));
 	handler?.(info, tab);
-
-	if (info.menuItemId === "summarize-page-in-chatgpt") {
-		browserAPI.tabs
-			.sendMessage(tab.id, { action: GET_PAGE_CONTENT })
-			.then(function handleGetPageContentResponse(response: Page) {
-				// Open ChatGPT website
-				return openAndWaitForComplete("https://chatgpt.com").then(
-					(targetTab) => {
-						// Send the page content to the target tab
-						browserAPI.tabs.sendMessage(targetTab.id, {
-							action: ACTION_SUMMARIZE_PAGE,
-							payload: response,
-						} satisfies PageActionPayload);
-					},
-				);
-			});
-	}
-
-	if (info.menuItemId === "summarize-youtube-in-perplexity") {
-		browserAPI.tabs
-			.sendMessage(tab.id, { action: GET_YOUTUBE_CONTENT })
-			.then(function handleGetYoutubeContentResponse(response: Youtube) {
-				// Open perplexity website
-				return openAndWaitForComplete("https://www.perplexity.ai/").then(
-					(perplexityTab) => {
-						browserAPI.tabs.sendMessage(perplexityTab.id, {
-							action: ACTION_SUMMARIZE_YOUTUBE,
-							payload: response,
-						} satisfies YoutubeActionPayload);
-					},
-				);
-			})
-			// and send it instructions to do the stuff once loaded
-			.error(console.error);
-	}
-
-	if (info.menuItemId === "summarize-youtube-in-chatgpt") {
-		browserAPI.tabs
-			.sendMessage(tab.id, { action: GET_YOUTUBE_CONTENT })
-			.then(function handleGetYoutubeContentResponse(response: Youtube) {
-				// Open ChatGPT website
-				return openAndWaitForComplete("https://chatgpt.com").then(
-					(targetTab) => {
-						browserAPI.tabs.sendMessage(targetTab.id, {
-							action: ACTION_SUMMARIZE_YOUTUBE,
-							payload: response,
-						} satisfies YoutubeActionPayload);
-					},
-				);
-			})
-			// and send it instructions to do the stuff once loaded
-			.error(console.error);
-	}
 });
 
 type OnTabUpdatedListener = Parameters<
