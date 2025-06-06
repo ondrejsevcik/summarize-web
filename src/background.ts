@@ -2,8 +2,6 @@ import {
 	ACTION_SUMMARIZE_PAGE,
 	ACTION_SUMMARIZE_SELECTION,
 	ACTION_SUMMARIZE_YOUTUBE,
-	FIX_GRAMMAR,
-	type FixGrammarActionPayload,
 	GET_PAGE_CONTENT,
 	GET_YOUTUBE_CONTENT,
 	type Page,
@@ -45,14 +43,6 @@ browserAPI.runtime.onInstalled.addListener(() => {
 		documentUrlPatterns: ["https://www.youtube.com/*"],
 	});
 
-	// Fix grammar issues in ChatGPT
-	browserAPI.contextMenus.create({
-		id: "fix-grammar-in-chatgpt",
-		title: "Fix grammar in ChatGPT",
-		contexts: ["selection"],
-	});
-
-	// Summarize selection in Perplexity
 	browserAPI.contextMenus.create({
 		id: "summarize-selection-in-perplexity",
 		title: "Summarize selection in Perplexity",
@@ -139,19 +129,6 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
 			})
 			// and send it instructions to do the stuff once loaded
 			.error(console.error);
-	}
-
-	if (info.menuItemId === "fix-grammar-in-chatgpt") {
-		const selectedText = info.selectionText;
-		// Open ChatGPT website in a temporary tab
-		openAndWaitForComplete("https://chatgpt.com/?temporary-chat=true").then(
-			(targetTab) => {
-				browserAPI.tabs.sendMessage(targetTab.id, {
-					action: FIX_GRAMMAR,
-					payload: selectedText,
-				} satisfies FixGrammarActionPayload);
-			},
-		);
 	}
 });
 
