@@ -17,7 +17,6 @@ browser.runtime.onMessage.addListener(handleMessage);
 
 function handleMessage(message: unknown) {
 	const { action, payload } = MessageSchema.parse(message);
-	console.debug("Request Action:", action);
 
 	if (action === ACTION_SUMMARIZE_YOUTUBE) {
 		return YoutubeContent.parseAsync(payload).then(runYoutubeSummarization);

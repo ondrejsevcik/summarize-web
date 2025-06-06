@@ -10,7 +10,6 @@ export function changeTextareaValue(
 	});
 
 	textarea.dispatchEvent(event);
-	console.debug("Changed value of textarea");
 }
 
 export function simulateFileSelection(

@@ -11,7 +11,6 @@ browser.runtime.onMessage.addListener(handleMessage);
 
 function handleMessage(message: unknown) {
 	const { action } = MessageSchema.parse(message);
-	console.debug("Request Action:", action);
 
 	if (action === GET_PAGE_CONTENT) {
 		return getPageContent();
