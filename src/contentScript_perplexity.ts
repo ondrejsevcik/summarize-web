@@ -4,72 +4,47 @@ import {
 	ACTION_SUMMARIZE_SELECTION,
 	ACTION_SUMMARIZE_TWEET,
 	ACTION_SUMMARIZE_YOUTUBE,
+	PageContent,
+	TweetSchema,
+	YoutubeContent,
 	type Page,
 	type Tweet,
 	type Youtube,
 } from "./types.js";
 import { assertNonNullish, querySelectorAsync, waitForTime } from "./utils";
+import browser from "webextension-polyfill";
+import { z } from "zod";
 
-// Cross-browser compatible approach
-// @ts-ignore
-const browserAPI = typeof browser !== "undefined" ? browser : chrome;
+browser.runtime.onMessage.addListener(handleMessage);
 
-browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	console.debug("Message received in content script:", message);
-	console.debug("Sender information:", sender);
+const MessageSchema = z.object({ action: z.string(), data: z.unknown() });
 
-	if (message.action === ACTION_SUMMARIZE_YOUTUBE) {
-		const youtubeData = message.data as Youtube;
-
-		runYoutubeSummarization(youtubeData)
-			.then(() => {
-				sendResponse({ status: "success" });
-			})
-			.catch((error) => {
-				console.error(error);
-				sendResponse({ status: "fail" });
-			});
+function handleMessage(message: unknown) {
+	const result = MessageSchema.safeParse(message);
+	if (!result.success) {
+		console.debug("Invalid message format:", result.error.issues);
+		return;
 	}
 
-	if (message.action === ACTION_SUMMARIZE_TWEET) {
-		const tweet = message.data as Tweet;
+	const { action, data } = result.data;
+	console.debug("Request Action:", action);
 
-		runTweetSummarization(tweet)
-			.then(() => {
-				sendResponse({ status: "success" });
-			})
-			.catch((error) => {
-				console.error(error);
-				sendResponse({ status: "fail" });
-			});
+	if (action === ACTION_SUMMARIZE_YOUTUBE) {
+		return YoutubeContent.parseAsync(data).then(runYoutubeSummarization);
 	}
 
-	if (message.action === ACTION_SUMMARIZE_PAGE) {
-		const pageData = message.data as Page;
-
-		runPageSummarization(pageData)
-			.then(() => {
-				sendResponse({ status: "success" });
-			})
-			.catch((error) => {
-				console.error(error);
-				sendResponse({ status: "fail" });
-			});
+	if (action === ACTION_SUMMARIZE_TWEET) {
+		return TweetSchema.parseAsync(data).then(runTweetSummarization);
 	}
 
-	if (message.action === ACTION_SUMMARIZE_SELECTION) {
-		const selectedText = message.data as string;
-
-		runSummarizeSelection(selectedText)
-			.then(() => {
-				sendResponse({ status: "success" });
-			})
-			.catch((error) => {
-				console.error(error);
-				sendResponse({ status: "fail" });
-			});
+	if (action === ACTION_SUMMARIZE_PAGE) {
+		return PageContent.parseAsync(data).then(runPageSummarization);
 	}
-});
+
+	if (action === ACTION_SUMMARIZE_SELECTION) {
+		return z.string().parseAsync(data).then(runSummarizeSelection);
+	}
+}
 
 async function runTweetSummarization(tweet: Tweet) {
 	const prompt = `Explain this tweet.
@@ -96,8 +71,8 @@ async function runPageSummarization(pageData: Page) {
 }
 
 async function runSummarizeSelection(selectedText: string) {
-	const prompt = "Give me key ideas from the following text:\n" + selectedText;
-	await changePerplexityTextareaValue(prompt);	
+	const prompt = `Give me key ideas from the following text:\n${selectedText}`;
+	await changePerplexityTextareaValue(prompt);
 
 	await disableWebSearch();
 	await submitPrompt();
