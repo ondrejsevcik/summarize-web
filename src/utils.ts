@@ -8,6 +8,38 @@ export function waitForTime(milliseconds: number) {
 }
 
 /**
+ * Waits for a condition to become true within a specified timeout period.
+ * 
+ * @returns Promise that resolves when condition is met
+ * @throws Error when timeout is reached before condition becomes true
+ */
+export function waitFor(
+	condition: () => boolean,
+	timeout = 10000,
+	interval = 250,
+): Promise<void> {
+	return new Promise((resolve, reject) => {
+		const startTime = Date.now();
+
+		const checkCondition = () => {
+			console.debug("Checking condition...");
+			if (condition()) {
+			console.debug("Condition met, resolving promise.");
+				resolve();
+			} else if (Date.now() - startTime >= timeout) {
+				console.debug("Timeout reached, rejecting promise.");
+				reject(new Error("Condition not met within timeout period"));
+			} else {
+				console.debug("Condition not met, checking again in interval.");
+				setTimeout(checkCondition, interval);
+			}
+		};
+
+		checkCondition();
+	});
+}
+
+/**
  * Awaits a promise and returns a tuple containing either an error or the result.
  */
 export async function perform<T>(
