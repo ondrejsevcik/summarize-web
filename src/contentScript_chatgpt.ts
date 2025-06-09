@@ -10,7 +10,7 @@ import {
 	type Page,
 	type Youtube,
 } from "./types";
-import { querySelectorAsync, waitForTime } from "./utils";
+import { querySelectorAsync, waitFor } from "./utils";
 import browser from "webextension-polyfill";
 
 browser.runtime.onMessage.addListener(handleMessage);
@@ -32,15 +32,11 @@ function handleMessage(message: unknown) {
 }
 
 async function runPageSummarization(pageData: Page) {
-	const prompt =
-		"Extract the essential ideas from this text, organizing them by importance (main concepts → supporting points). Preserve logical connections between ideas and include just enough context to ensure understanding. Format your response for both quick scanning and deeper comprehension.";
+	const prompt = "Give me key ideas from the attached file.";
 	await updateEditorValue(prompt);
 
 	const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
 	await uploadFile(fileContent);
-
-	// Wait for upload
-	await waitForTime(5000);
 	await submitButton();
 }
 
@@ -50,14 +46,11 @@ async function runYoutubeSummarization(youtubeData: Youtube) {
 
 	const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
 	await uploadFile(fileContent);
-
-	// Wait for upload
-	await waitForTime(5000);
 	await submitButton();
 }
 
 async function runSummarizeSelection(selectedText: string) {
-	const prompt = `Give me key ideas from the following text:\n${selectedText}`;
+	const prompt = `Give me key ideas from the following text:\n\n${selectedText}`;
 	await updateEditorValue(prompt);
 	await submitButton();
 }
@@ -79,8 +72,17 @@ async function uploadFile(fileContent: string) {
 }
 
 async function submitButton() {
+	const oneMinuteTimeout = 60 * 1000;
+
+	await waitFor(() => {
+		// Wait for the submit button to be enabled
+		const button = document.querySelector<HTMLButtonElement>("[aria-label='Send prompt']");
+		return button?.disabled === false;
+	}, oneMinuteTimeout);
+
 	const submitButton = await querySelectorAsync<HTMLButtonElement>(
 		"[aria-label='Send prompt']",
 	);
+
 	submitButton.click();
 }
