@@ -9,7 +9,7 @@ import {
 	type Page,
 	type Youtube,
 } from "./types";
-import { assertNonNullish, querySelectorAsync, waitForTime } from "./utils";
+import { assertNonNullish, querySelectorAsync, waitFor } from "./utils";
 import browser from "webextension-polyfill";
 import { z } from "zod";
 
@@ -68,27 +68,34 @@ async function changePerplexityTextareaValue(value: string) {
 }
 
 async function disableWebSearch() {
-	// Find the "set sources for search" button
-	const svgIcon = await querySelectorAsync(".tabler-icon-world");
-	const setSourcesButton = svgIcon.closest<HTMLButtonElement>("button");
+	return true;
+	// TODO this needs to be fixed
 
-	assertNonNullish(setSourcesButton, "setSourcesButton is null");
-	setSourcesButton.click();
+	// // Find the "set sources for search" button
+	// const svgIcon = await querySelectorAsync(".tabler-icon-world");
+	// const setSourcesButton = svgIcon.closest<HTMLButtonElement>("button");
 
-	// The modal needs some time to open
-	await waitForTime(100);
+	// assertNonNullish(setSourcesButton, "setSourcesButton is null");
+	// setSourcesButton.click();
 
-	// Find and click the "search web" switch is on
-	const switchElement = await querySelectorAsync<HTMLButtonElement>(
-		'button[role="switch"]',
-	);
+	// const searchWebBtn = await querySelectorAsync<HTMLButtonElement>(
+	// 	'button[role="switch"]',
+	// );
 
-	if (switchElement.getAttribute("aria-checked") === "true") {
-		switchElement.click();
+	// if (searchWebBtn.getAttribute("aria-checked") === "true") {
+	// 	searchWebBtn.click();
 
-		// Wait for the switch to take effect
-		await waitForTime(500);
-	}
+	// 	await waitFor(() => {
+	// 		console.debug("Waiting for web search to be disabled...");
+	// 		// Wait for the switch to take effect
+	// 		const updatedBtn = document.querySelector<HTMLButtonElement>(
+	// 			'button[role="switch"]',
+	// 		);
+	// 		return updatedBtn?.getAttribute("aria-checked") === "false";
+	// 	});
+
+	// 	console.debug("Web search disabled");
+	// }
 }
 
 async function uploadFile(content: string) {
@@ -98,13 +105,21 @@ async function uploadFile(content: string) {
 	assertNonNullish(inputElement, "inputElement is null");
 	simulateFileSelection(inputElement, content, "content.txt", "text/plain");
 
-	// Wait for upload
-	await waitForTime(5000);
+	await waitFor(() => {
+		// Wait for upload to finish
+		return document.querySelector(".tabler-icon-loader-2") === null;
+	});
 }
 
 async function submitPrompt() {
 	const submitButton = await querySelectorAsync<HTMLButtonElement>(
 		"[aria-label=Submit]",
 	);
+
+	await waitFor(() => {
+		// Wait for the submit button to be enabled
+		return !submitButton.disabled;
+	});
+
 	submitButton.click();
 }
