@@ -15,4 +15,4 @@ https://github.com/user-attachments/assets/69ddcb9f-62d1-4188-8d85-ab7b838bb132
 
 ## Installation
 
-TODO add installation instructions
+You can install the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/summarize-web/iigkbidioiajlfkngjclfmdagnchbhcp).
