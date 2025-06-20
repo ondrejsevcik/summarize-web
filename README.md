@@ -9,10 +9,12 @@ https://github.com/user-attachments/assets/69ddcb9f-62d1-4188-8d85-ab7b838bb132
 - 🖱️ Right-click any webpage to summarize instantly
 - 📺 Summarize YouTube videos and articles  
 - ✂️ Summarize selected text snippets
-- 🤖 Choose between Perplexity AI or ChatGPT
+- 🤖 Choose between Perplexity[^1] or ChatGPT
 - 🆓 Completely free - no ads, no tracking
 - 🌐 Works on Chrome and Firefox
 
 ## Installation
 
 You can install the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/summarize-web/iigkbidioiajlfkngjclfmdagnchbhcp).
+
+[^1]: Perplexity Pro is required for file uploads.
