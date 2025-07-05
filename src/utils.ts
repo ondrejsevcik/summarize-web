@@ -9,12 +9,13 @@ export function waitForTime(milliseconds: number) {
 
 /**
  * Waits for a condition to become true within a specified timeout period.
- * 
+ *
  * @returns Promise that resolves when condition is met
  * @throws Error when timeout is reached before condition becomes true
  */
 export function waitFor(
 	condition: () => boolean,
+	description: string,
 	timeout = 10000,
 	interval = 250,
 ): Promise<void> {
@@ -22,15 +23,22 @@ export function waitFor(
 		const startTime = Date.now();
 
 		const checkCondition = () => {
-			console.debug("Checking condition...");
+			console.debug("Checking condition...", description);
 			if (condition()) {
-			console.debug("Condition met, resolving promise.");
+				console.debug("Condition met, resolving promise.", description);
 				resolve();
 			} else if (Date.now() - startTime >= timeout) {
-				console.debug("Timeout reached, rejecting promise.");
-				reject(new Error("Condition not met within timeout period"));
+				console.debug("Timeout reached, rejecting promise.", description);
+				reject(
+					new Error(
+						`Condition not met within timeout period for : ${description}`,
+					),
+				);
 			} else {
-				console.debug("Condition not met, checking again in interval.");
+				console.debug(
+					"Condition not met, checking again in interval.",
+					description,
+				);
 				setTimeout(checkCondition, interval);
 			}
 		};

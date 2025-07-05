@@ -1,4 +1,9 @@
-import { changeTextareaValue, simulateFileSelection } from "./dom-utils";
+import {
+	changeTextareaValue,
+	simulateFileSelection,
+	changeContentEditableValue,
+	updateLexicalContent,
+} from "./dom-utils";
 import {
 	ACTION_SUMMARIZE_PAGE,
 	ACTION_SUMMARIZE_SELECTION,
@@ -35,10 +40,10 @@ async function runPageSummarization(pageData: Page) {
 	const prompt = "Give me key ideas from the attached file.";
 	await changePerplexityTextareaValue(prompt);
 
-	const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
-	await uploadFile(fileContent);
+	// const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
+	// await uploadFile(fileContent);
 
-	await disableWebSearch();
+	// await disableWebSearch();
 	await submitPrompt();
 }
 
@@ -63,8 +68,15 @@ async function runYoutubeSummarization(youtubeData: Youtube) {
 }
 
 async function changePerplexityTextareaValue(value: string) {
-	const textarea = await querySelectorAsync<HTMLTextAreaElement>("textarea");
-	changeTextareaValue(textarea, value);
+	await waitFor(function checkLexicalEditorPresence() {
+		// @ts-ignore
+		return document.querySelector("#ask-input").__lexicalEditor !== undefined;
+	}, "Waiting for Lexical editor to be present");
+
+	const contentEditableDiv =
+		await querySelectorAsync<HTMLDivElement>("#ask-input");
+	updateLexicalContent(contentEditableDiv, value);
+	// changeContentEditableValue(contentEditableDiv, value);
 }
 
 async function disableWebSearch() {
@@ -105,21 +117,21 @@ async function uploadFile(content: string) {
 	assertNonNullish(inputElement, "inputElement is null");
 	simulateFileSelection(inputElement, content, "content.txt", "text/plain");
 
-	await waitFor(() => {
+	await waitFor(function waitForUploadToFinish() {
 		// Wait for upload to finish
 		return document.querySelector(".tabler-icon-loader-2") === null;
-	});
+	}, "Waiting for file upload to finish");
 }
 
 async function submitPrompt() {
 	const submitButton = await querySelectorAsync<HTMLButtonElement>(
-		"[aria-label=Submit]",
+		"[data-testid=submit-button]",
 	);
 
-	await waitFor(() => {
+	await waitFor(function waitForSubmitToEnable() {
 		// Wait for the submit button to be enabled
 		return !submitButton.disabled;
-	});
+	}, "Waiting for submit button to be enabled");
 
 	submitButton.click();
 }

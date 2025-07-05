@@ -12,6 +12,22 @@ export function changeTextareaValue(
 	textarea.dispatchEvent(event);
 }
 
+export function changeContentEditableValue(
+	element: HTMLElement,
+	value: string,
+) {
+	// Clear existing content and set new content
+	element.innerHTML = `<p>${value}</p>`;
+
+	// Dispatch input event to notify the application
+	const event = new Event("input", {
+		bubbles: true,
+		cancelable: true,
+	});
+
+	element.dispatchEvent(event);
+}
+
 export function simulateFileSelection(
 	inputElement: HTMLInputElement,
 	fileContent: string,
@@ -33,3 +49,43 @@ export function simulateFileSelection(
 	inputElement.dispatchEvent(event);
 }
 
+export function updateLexicalContent(el: HTMLElement, newText: string) {
+	// @ts-ignore
+	const editor = el.__lexicalEditor;
+	if (!editor) {
+		throw new Error("Lexical editor not found on the element.");
+	}
+
+	const jsonState = {
+		root: {
+			children: [
+				{
+					children: [
+						{
+							detail: 0,
+							format: 0,
+							mode: "normal",
+							style: "",
+							text: newText,
+							type: "text",
+							version: 1,
+						},
+					],
+					direction: null,
+					format: "",
+					indent: 0,
+					type: "paragraph",
+					version: 1,
+				},
+			],
+			direction: null,
+			format: "",
+			indent: 0,
+			type: "root",
+			version: 1,
+		},
+	};
+
+	const newEditorState = editor.parseEditorState(JSON.stringify(jsonState));
+	editor.setEditorState(newEditorState);
+}
