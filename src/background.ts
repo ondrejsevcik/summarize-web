@@ -35,6 +35,12 @@ function handleInstallation() {
 	});
 
 	browser.contextMenus.create({
+		id: "summarize-page-in-venice",
+		title: "Summarize page in Venice",
+		contexts: ["page"],
+	});
+
+	browser.contextMenus.create({
 		id: "summarize-youtube-in-perplexity",
 		title: "Summarize Youtube in Perplexity",
 		contexts: ["page"],
@@ -51,6 +57,13 @@ function handleInstallation() {
 	browser.contextMenus.create({
 		id: "summarize-youtube-in-claude",
 		title: "Summarize Youtube in Claude",
+		contexts: ["page"],
+		documentUrlPatterns: ["https://www.youtube.com/*"],
+	});
+
+	browser.contextMenus.create({
+		id: "summarize-youtube-in-venice",
+		title: "Summarize Youtube in Venice",
 		contexts: ["page"],
 		documentUrlPatterns: ["https://www.youtube.com/*"],
 	});
@@ -78,9 +91,11 @@ const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-page-in-perplexity", summarizePageInPerplexity],
 	["summarize-page-in-chatgpt", summarizePageInChatGPT],
 	["summarize-page-in-claude", summarizePageInClaude],
+	["summarize-page-in-venice", summarizePageInVenice],
 	["summarize-youtube-in-perplexity", summarizeYoutubeInPerplexity],
 	["summarize-youtube-in-chatgpt", summarizeYoutubeInChatGPT],
 	["summarize-youtube-in-claude", summarizeYoutubeInClaude],
+	["summarize-youtube-in-venice", summarizeYoutubeInVenice],
 ]);
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
@@ -156,6 +171,21 @@ async function summarizePageInClaude(info: Info, tab: Tab) {
 		});
 }
 
+async function summarizePageInVenice(info: Info, tab: Tab) {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const aiTab = await openTab("https://venice.ai/chat");
+			const tabId = getTabId(aiTab);
+			browser.tabs.sendMessage(tabId, {
+				action: ACTION_SUMMARIZE_PAGE,
+				payload: PageContent.parse(value),
+			} satisfies PageActionPayload);
+		});
+}
+
 async function summarizeYoutubeInPerplexity(info: Info, tab: Tab) {
 	const tabId = getTabId(tab);
 
@@ -193,6 +223,21 @@ async function summarizeYoutubeInClaude(info: Info, tab: Tab) {
 		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
 		.then(async function handleResponse(value: unknown) {
 			const aiTab = await openTab("https://claude.ai/new");
+			const tabId = getTabId(aiTab);
+			browser.tabs.sendMessage(tabId, {
+				action: ACTION_SUMMARIZE_YOUTUBE,
+				payload: YoutubeContent.parse(value),
+			} satisfies YoutubeActionPayload);
+		});
+}
+
+async function summarizeYoutubeInVenice(info: Info, tab: Tab) {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const aiTab = await openTab("https://venice.ai/chat");
 			const tabId = getTabId(aiTab);
 			browser.tabs.sendMessage(tabId, {
 				action: ACTION_SUMMARIZE_YOUTUBE,

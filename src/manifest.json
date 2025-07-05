@@ -28,6 +28,10 @@
       "js": ["contentScript_claude.ts"]
     },
     {
+      "matches": ["https://venice.ai/*"],
+      "js": ["contentScript_venice.ts"]
+    },
+    {
       "matches": ["<all_urls>"],
       "js": ["contentScript_pageContent.ts"]
     },
