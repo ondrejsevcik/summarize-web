@@ -49,6 +49,13 @@ function handleInstallation() {
 	});
 
 	browser.contextMenus.create({
+		id: "summarize-youtube-in-claude",
+		title: "Summarize Youtube in Claude",
+		contexts: ["page"],
+		documentUrlPatterns: ["https://www.youtube.com/*"],
+	});
+
+	browser.contextMenus.create({
 		id: "summarize-selection-in-perplexity",
 		title: "Summarize selection in Perplexity",
 		contexts: ["selection"],
@@ -73,6 +80,7 @@ const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-page-in-claude", summarizePageInClaude],
 	["summarize-youtube-in-perplexity", summarizeYoutubeInPerplexity],
 	["summarize-youtube-in-chatgpt", summarizeYoutubeInChatGPT],
+	["summarize-youtube-in-claude", summarizeYoutubeInClaude],
 ]);
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
@@ -172,6 +180,21 @@ async function summarizeYoutubeInChatGPT(info: Info, tab: Tab) {
 			const chatGPTTab = await openTab("https://chatgpt.com");
 			const chatGPTTabId = getTabId(chatGPTTab);
 			browser.tabs.sendMessage(chatGPTTabId, {
+				action: ACTION_SUMMARIZE_YOUTUBE,
+				payload: YoutubeContent.parse(value),
+			} satisfies YoutubeActionPayload);
+		});
+}
+
+async function summarizeYoutubeInClaude(info: Info, tab: Tab) {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const aiTab = await openTab("https://claude.ai/new");
+			const tabId = getTabId(aiTab);
+			browser.tabs.sendMessage(tabId, {
 				action: ACTION_SUMMARIZE_YOUTUBE,
 				payload: YoutubeContent.parse(value),
 			} satisfies YoutubeActionPayload);
