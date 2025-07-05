@@ -24,6 +24,10 @@
       "js": ["contentScript_chatgpt.ts"]
     },
     {
+      "matches": ["https://claude.ai/*"],
+      "js": ["contentScript_claude.ts"]
+    },
+    {
       "matches": ["<all_urls>"],
       "js": ["contentScript_pageContent.ts"]
     },

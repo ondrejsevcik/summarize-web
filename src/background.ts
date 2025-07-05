@@ -29,6 +29,12 @@ function handleInstallation() {
 	});
 
 	browser.contextMenus.create({
+		id: "summarize-page-in-claude",
+		title: "Summarize page in Claude",
+		contexts: ["page"],
+	});
+
+	browser.contextMenus.create({
 		id: "summarize-youtube-in-perplexity",
 		title: "Summarize Youtube in Perplexity",
 		contexts: ["page"],
@@ -64,6 +70,7 @@ const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-selection-in-chatgpt", summarizeSelectionInChatGPT],
 	["summarize-page-in-perplexity", summarizePageInPerplexity],
 	["summarize-page-in-chatgpt", summarizePageInChatGPT],
+	["summarize-page-in-claude", summarizePageInClaude],
 	["summarize-youtube-in-perplexity", summarizeYoutubeInPerplexity],
 	["summarize-youtube-in-chatgpt", summarizeYoutubeInChatGPT],
 ]);
@@ -120,6 +127,21 @@ async function summarizePageInChatGPT(info: Info, tab: Tab) {
 			const chatGPTTab = await openTab("https://chatgpt.com");
 			const chatGPTTabId = getTabId(chatGPTTab);
 			browser.tabs.sendMessage(chatGPTTabId, {
+				action: ACTION_SUMMARIZE_PAGE,
+				payload: PageContent.parse(value),
+			} satisfies PageActionPayload);
+		});
+}
+
+async function summarizePageInClaude(info: Info, tab: Tab) {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			const aiTab = await openTab("https://claude.ai/new");
+			const tabId = getTabId(aiTab);
+			browser.tabs.sendMessage(tabId, {
 				action: ACTION_SUMMARIZE_PAGE,
 				payload: PageContent.parse(value),
 			} satisfies PageActionPayload);
