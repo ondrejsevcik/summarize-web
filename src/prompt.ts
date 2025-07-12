@@ -16,7 +16,7 @@ export const PROMPT = `Analyze the provided content and create a structured summ
 ## Instructions:
 1. **Identify 4-10 main thematic sections** that capture the core elements of the content
 2. **Use descriptive, specific headings** that clearly indicate what each section covers
-3. **Write in clear, accessible language** while maintaining accuracy
+3. **Write in American English. Use clear, accessible language** while maintaining accuracy
 4. **Include key facts, quotes, and details** that support each main point
 5. **Maintain logical flow** from most important/immediate information to broader context
 6. **Highlight expert opinions, official statements, or authoritative sources** when present
