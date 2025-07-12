@@ -28,6 +28,12 @@ function handleInstallation() {
 		title: "Summarize in ChatGPT",
 		contexts: ["page"],
 	});
+
+	browser.contextMenus.create({
+		id: "download-content",
+		title: "Download Content as TXT file",
+		contexts: ["page"],
+	});
 }
 
 type Info = browser.Menus.OnClickData;
@@ -38,6 +44,7 @@ const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-page-in-venice", buildSummarizeContent("https://venice.ai/chat")],
 	["summarize-page-in-claude", buildSummarizeContent("https://claude.ai/new")],
 	["summarize-page-in-chatgpt", buildSummarizeContent("https://chatgpt.com")],
+	["download-content", downloadContentAsTxtFile],
 ]);
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
@@ -68,4 +75,28 @@ function buildSummarizeContent(aiToolUrl: string) {
 				} satisfies SummarizePromptPayload);
 			});
 	};
+}
+
+async function downloadContentAsTxtFile(info: Info, tab: Tab): Promise<void> {
+	const tabId = getTabId(tab);
+
+	browser.tabs
+		.sendMessage(tabId, { action: GET_CONTENT })
+		.then(async function handleResponse(value: unknown) {
+			if (typeof value !== "string") {
+				throw new Error("Expected content to be a string");
+			}
+
+			const blob = new Blob([value], { type: "text/plain" });
+			const url = URL.createObjectURL(blob);
+			const filename = `content-${Date.now()}.txt`;
+
+			await browser.downloads.download({
+				url,
+				filename,
+				saveAs: true,
+			});
+
+			URL.revokeObjectURL(url);
+		});
 }
