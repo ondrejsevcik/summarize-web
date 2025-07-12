@@ -74,9 +74,9 @@ const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-page-in-chatgpt", summarizePageInChatGPT],
 	["summarize-page-in-claude", summarizePageInClaude],
 	["summarize-page-in-venice", summarizePageInVenice],
-	["summarize-youtube-in-chatgpt", summarizeYoutubeInChatGPT],
-	["summarize-youtube-in-claude", summarizeYoutubeInClaude],
-	["summarize-youtube-in-venice", summarizeYoutubeInVenice],
+	["summarize-youtube-in-chatgpt", buildSummarizeYoutube("https://chatgpt.com")],
+	["summarize-youtube-in-claude", buildSummarizeYoutube("https://claude.ai/new")],
+	["summarize-youtube-in-venice", buildSummarizeYoutube("https://venice.ai/chat")],
 ]);
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
@@ -143,47 +143,19 @@ async function summarizePageInVenice(info: Info, tab: Tab) {
 		});
 }
 
-async function summarizeYoutubeInChatGPT(info: Info, tab: Tab) {
-	const tabId = getTabId(tab);
+function buildSummarizeYoutube(aiToolUrl: string) {
+	return async function summarizeYoutube(info: Info, tab: Tab) {
+		const tabId = getTabId(tab);
 
-	browser.tabs
-		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const chatGPTTab = await openTab("https://chatgpt.com");
-			const chatGPTTabId = getTabId(chatGPTTab);
-			browser.tabs.sendMessage(chatGPTTabId, {
-				action: ACTION_SUMMARIZE_YOUTUBE,
-				payload: YoutubeContent.parse(value),
-			} satisfies YoutubeActionPayload);
-		});
-}
-
-async function summarizeYoutubeInClaude(info: Info, tab: Tab) {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const aiTab = await openTab("https://claude.ai/new");
-			const tabId = getTabId(aiTab);
-			browser.tabs.sendMessage(tabId, {
-				action: ACTION_SUMMARIZE_YOUTUBE,
-				payload: YoutubeContent.parse(value),
-			} satisfies YoutubeActionPayload);
-		});
-}
-
-async function summarizeYoutubeInVenice(info: Info, tab: Tab) {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const aiTab = await openTab("https://venice.ai/chat");
-			const tabId = getTabId(aiTab);
-			browser.tabs.sendMessage(tabId, {
-				action: ACTION_SUMMARIZE_YOUTUBE,
-				payload: YoutubeContent.parse(value),
-			} satisfies YoutubeActionPayload);
-		});
+		browser.tabs
+			.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
+			.then(async function handleResponse(value: unknown) {
+				const aiTab = await openTab(aiToolUrl);
+				const tabId = getTabId(aiTab);
+				browser.tabs.sendMessage(tabId, {
+					action: ACTION_SUMMARIZE_YOUTUBE,
+					payload: YoutubeContent.parse(value),
+				} satisfies YoutubeActionPayload);
+			});
+	};
 }
