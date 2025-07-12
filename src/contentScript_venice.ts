@@ -1,8 +1,6 @@
-import { z } from "zod";
 import { simulateFileSelection } from "./dom-utils";
 import {
 	ACTION_SUMMARIZE_PAGE,
-	ACTION_SUMMARIZE_SELECTION,
 	ACTION_SUMMARIZE_YOUTUBE,
 	MessageSchema,
 	PageContent,
@@ -25,10 +23,6 @@ function handleMessage(message: unknown) {
 	if (action === ACTION_SUMMARIZE_YOUTUBE) {
 		return YoutubeContent.parseAsync(payload).then(runYoutubeSummarization);
 	}
-
-	if (action === ACTION_SUMMARIZE_SELECTION) {
-		return z.string().parseAsync(payload).then(runSummarizeSelection);
-	}
 }
 
 async function runPageSummarization(pageData: Page) {
@@ -45,12 +39,6 @@ async function runYoutubeSummarization(youtubeData: Youtube) {
 
 	const fileContent = `Youtube Video Title: ${youtubeData.title}\n\nTranscript:\n${youtubeData.transcript}`;
 	await uploadFile(fileContent);
-	await submitButton();
-}
-
-async function runSummarizeSelection(selectedText: string) {
-	const prompt = `Give me key ideas from the following text:\n\n${selectedText}`;
-	await updateEditorValue(prompt);
 	await submitButton();
 }
 

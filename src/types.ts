@@ -26,8 +26,6 @@ export const GET_YOUTUBE_CONTENT = "GET_YOUTUBE_CONTENT";
 
 export const ACTION_SUMMARIZE_PAGE = "ACTION_SUMMARIZE_PAGE";
 export const ACTION_SUMMARIZE_YOUTUBE = "ACTION_SUMMARIZE_YOUTUBE";
-export const ACTION_SUMMARIZE_SELECTION = "ACTION_SUMMARIZE_SELECTION";
 
 export type PageActionPayload = { action: "ACTION_SUMMARIZE_PAGE", payload: Page };
 export type YoutubeActionPayload = { action: "ACTION_SUMMARIZE_YOUTUBE", payload: Youtube };
-export type SummarizeSelectionActionPayload = { action: "ACTION_SUMMARIZE_SELECTION", payload: string };
