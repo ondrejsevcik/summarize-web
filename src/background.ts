@@ -70,7 +70,7 @@ type Tab = browser.Tabs.Tab;
 type ContextMenuHandler = (info: Info, tab: Tab) => Promise<unknown>;
 
 const actionMap = new Map<string, ContextMenuHandler>([
-	["summarize-selection-in-chatgpt", summarizeSelectionInChatGPT],
+	["summarize-selection-in-chatgpt", buildSummarizeSelection("https://chatgpt.com")],
 	["summarize-page-in-chatgpt", buildSummarizePage("https://chatgpt.com")],
 	["summarize-page-in-claude", buildSummarizePage("https://claude.ai/new")],
 	["summarize-page-in-venice", buildSummarizePage("https://venice.ai/chat")],
@@ -98,13 +98,16 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
 	handler?.(info, tab);
 });
 
-async function summarizeSelectionInChatGPT(info: Info, tab: Tab) {
-	const selectedText = info.selectionText ?? "";
-	const openedTab = await openTab("https://chatgpt.com");
-	browser.tabs.sendMessage(getTabId(openedTab), {
-		action: ACTION_SUMMARIZE_SELECTION,
-		payload: selectedText,
-	} satisfies SummarizeSelectionActionPayload);
+function buildSummarizeSelection(aiToolUrl: string) {
+	return async function summarizeSelection(info: Info, tab: Tab) {
+		const selectedText = info.selectionText ?? "";
+		const aiTab = await openTab(aiToolUrl);
+		const tabId = getTabId(aiTab);
+		browser.tabs.sendMessage(tabId, {
+			action: ACTION_SUMMARIZE_SELECTION,
+			payload: selectedText,
+		} satisfies SummarizeSelectionActionPayload);
+	};
 }
 
 function buildSummarizePage(aiToolUrl: string) {
