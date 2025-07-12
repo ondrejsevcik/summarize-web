@@ -1,13 +1,13 @@
 import { Readability } from "@mozilla/readability";
 import browser from "webextension-polyfill";
-import { GET_PAGE_CONTENT, MessageSchema } from "./types";
+import { GET_CONTENT, MessageSchema } from "./types";
 
 browser.runtime.onMessage.addListener(handleMessage);
 
 function handleMessage(message: unknown) {
 	const { action } = MessageSchema.parse(message);
 
-	if (action === GET_PAGE_CONTENT) {
+	if (action === GET_CONTENT) {
 		return getPageContent();
 	}
 }

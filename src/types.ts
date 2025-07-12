@@ -14,9 +14,7 @@ export const PromptSchema = zod.object({
 
 export type Prompt = zod.infer<typeof PromptSchema>;
 
-export const GET_PAGE_CONTENT = "GET_PAGE_CONTENT";
-export const GET_YOUTUBE_CONTENT = "GET_YOUTUBE_CONTENT";
-
+export const GET_CONTENT = "GET_CONTENT";
 export const ACTION_SUMMARIZE = "ACTION_SUMMARIZE";
 
 export type SummarizePromptPayload = { action: "ACTION_SUMMARIZE", payload: Prompt };

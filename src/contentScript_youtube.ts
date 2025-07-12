@@ -1,5 +1,5 @@
 import { querySelectorAsync } from "./utils";
-import { GET_YOUTUBE_CONTENT, MessageSchema } from "./types";
+import { GET_CONTENT, MessageSchema } from "./types";
 import browser from "webextension-polyfill";
 
 browser.runtime.onMessage.addListener(handleMessage);
@@ -7,7 +7,7 @@ browser.runtime.onMessage.addListener(handleMessage);
 function handleMessage(message: unknown) {
 	const { action } = MessageSchema.parse(message);
 
-	if (action === GET_YOUTUBE_CONTENT) {
+	if (action === GET_CONTENT) {
 		return getYoutubeContent();
 	}
 }

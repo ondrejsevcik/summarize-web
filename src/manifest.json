@@ -1,39 +1,45 @@
 {
-  "manifest_version": 3,
-  "name": "Summarize Web",
-  "version": "1.0.1",
-  "description": "Summarize web content using Venice.ai, ChatGPT and Claude.",
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  },
-  "permissions": ["contextMenus"],
-  "background": {
-    "__NOTE__": "using both since Firefox and Chrome support different formats",
-    "service_worker": "background.ts",
-    "scripts": ["background.ts"]
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://chatgpt.com/*"],
-      "js": ["contentScript_chatgpt.ts"]
-    },
-    {
-      "matches": ["https://claude.ai/*"],
-      "js": ["contentScript_claude.ts"]
-    },
-    {
-      "matches": ["https://venice.ai/*"],
-      "js": ["contentScript_venice.ts"]
-    },
-    {
-      "matches": ["<all_urls>"],
-      "js": ["contentScript_pageContent.ts"]
-    },
-    {
-      "matches": ["https://youtube.com/*", "https://www.youtube.com/*"],
-      "js": ["contentScript_youtube.ts"]
-    }
-  ]
+	"manifest_version": 3,
+	"name": "Summarize Web",
+	"version": "1.0.1",
+	"description": "Summarize web content using Venice.ai, ChatGPT and Claude.",
+	"icons": {
+		"16": "icons/icon16.png",
+		"48": "icons/icon48.png",
+		"128": "icons/icon128.png"
+	},
+	"permissions": ["contextMenus"],
+	"background": {
+		"__NOTE__": "using both since Firefox and Chrome support different formats",
+		"service_worker": "background.ts",
+		"scripts": ["background.ts"]
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://venice.ai/*"],
+			"js": ["contentScript_venice.ts"]
+		},
+		{
+			"matches": ["https://claude.ai/*"],
+			"js": ["contentScript_claude.ts"]
+		},
+		{
+			"matches": ["https://chatgpt.com/*"],
+			"js": ["contentScript_chatgpt.ts"]
+		},
+		{
+			"matches": ["http://*/*", "https://*/*"],
+			"exclude_matches": [
+				"https://www.youtube.com/*",
+				"http://www.youtube.com/*",
+				"https://m.youtube.com/*",
+				"http://m.youtube.com/*"
+			],
+			"js": ["contentScript_pageContent.ts"]
+		},
+		{
+			"matches": ["https://youtube.com/*", "https://www.youtube.com/*"],
+			"js": ["contentScript_youtube.ts"]
+		}
+	]
 }

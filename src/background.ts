@@ -1,6 +1,5 @@
 import {
-	GET_PAGE_CONTENT,
-	GET_YOUTUBE_CONTENT,
+	GET_CONTENT,
 	PromptSchema,
 	type SummarizePromptPayload,
 	ACTION_SUMMARIZE,
@@ -55,28 +54,18 @@ function buildSummarizeContent(aiToolUrl: string) {
 	return async function summarizePage(info: Info, tab: Tab) {
 		const tabId = getTabId(tab);
 
-		let event: Promise<unknown> | undefined = undefined;
-
-		if (tab.url?.includes("youtube.com")) {
-			event = browser.tabs.sendMessage(tabId, {
-				action: GET_YOUTUBE_CONTENT,
+		browser.tabs
+			.sendMessage(tabId, { action: GET_CONTENT })
+			.then(async function handleResponse(value: unknown) {
+				const aiTab = await openTab(aiToolUrl);
+				const tabId = getTabId(aiTab);
+				browser.tabs.sendMessage(tabId, {
+					action: ACTION_SUMMARIZE,
+					payload: PromptSchema.parse({
+						promptText: PROMPT,
+						attachment: value,
+					}),
+				} satisfies SummarizePromptPayload);
 			});
-		} else {
-			event = browser.tabs.sendMessage(tabId, {
-				action: GET_PAGE_CONTENT,
-			});
-		}
-
-		event.then(async function handleResponse(value: unknown) {
-			const aiTab = await openTab(aiToolUrl);
-			const tabId = getTabId(aiTab);
-			browser.tabs.sendMessage(tabId, {
-				action: ACTION_SUMMARIZE,
-				payload: PromptSchema.parse({
-					promptText: PROMPT,
-					attachment: value,
-				}),
-			} satisfies SummarizePromptPayload);
-		});
 	};
 }
