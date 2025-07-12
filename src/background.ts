@@ -16,8 +16,8 @@ browser.runtime.onInstalled.addListener(handleInstallation);
 function handleInstallation() {
 	// Page context menu items
 	browser.contextMenus.create({
-		id: "summarize-page-in-chatgpt",
-		title: "Summarize page in ChatGPT",
+		id: "summarize-page-in-venice",
+		title: "Summarize page in Venice",
 		contexts: ["page"],
 	});
 
@@ -28,15 +28,15 @@ function handleInstallation() {
 	});
 
 	browser.contextMenus.create({
-		id: "summarize-page-in-venice",
-		title: "Summarize page in Venice",
+		id: "summarize-page-in-chatgpt",
+		title: "Summarize page in ChatGPT",
 		contexts: ["page"],
 	});
 
 	// Youtube context menu items
 	browser.contextMenus.create({
-		id: "summarize-youtube-in-chatgpt",
-		title: "Summarize Youtube in ChatGPT",
+		id: "summarize-youtube-in-venice",
+		title: "Summarize Youtube in Venice",
 		contexts: ["page"],
 		documentUrlPatterns: ["https://www.youtube.com/*"],
 	});
@@ -49,8 +49,8 @@ function handleInstallation() {
 	});
 
 	browser.contextMenus.create({
-		id: "summarize-youtube-in-venice",
-		title: "Summarize Youtube in Venice",
+		id: "summarize-youtube-in-chatgpt",
+		title: "Summarize Youtube in ChatGPT",
 		contexts: ["page"],
 		documentUrlPatterns: ["https://www.youtube.com/*"],
 	});
