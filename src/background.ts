@@ -71,12 +71,21 @@ type ContextMenuHandler = (info: Info, tab: Tab) => Promise<unknown>;
 
 const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-selection-in-chatgpt", summarizeSelectionInChatGPT],
-	["summarize-page-in-chatgpt", summarizePageInChatGPT],
-	["summarize-page-in-claude", summarizePageInClaude],
-	["summarize-page-in-venice", summarizePageInVenice],
-	["summarize-youtube-in-chatgpt", buildSummarizeYoutube("https://chatgpt.com")],
-	["summarize-youtube-in-claude", buildSummarizeYoutube("https://claude.ai/new")],
-	["summarize-youtube-in-venice", buildSummarizeYoutube("https://venice.ai/chat")],
+	["summarize-page-in-chatgpt", buildSummarizePage("https://chatgpt.com")],
+	["summarize-page-in-claude", buildSummarizePage("https://claude.ai/new")],
+	["summarize-page-in-venice", buildSummarizePage("https://venice.ai/chat")],
+	[
+		"summarize-youtube-in-chatgpt",
+		buildSummarizeYoutube("https://chatgpt.com"),
+	],
+	[
+		"summarize-youtube-in-claude",
+		buildSummarizeYoutube("https://claude.ai/new"),
+	],
+	[
+		"summarize-youtube-in-venice",
+		buildSummarizeYoutube("https://venice.ai/chat"),
+	],
 ]);
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
@@ -98,49 +107,21 @@ async function summarizeSelectionInChatGPT(info: Info, tab: Tab) {
 	} satisfies SummarizeSelectionActionPayload);
 }
 
-async function summarizePageInChatGPT(info: Info, tab: Tab) {
-	const tabId = getTabId(tab);
+function buildSummarizePage(aiToolUrl: string) {
+	return async function summarizePage(info: Info, tab: Tab) {
+		const tabId = getTabId(tab);
 
-	browser.tabs
-		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const chatGPTTab = await openTab("https://chatgpt.com");
-			const chatGPTTabId = getTabId(chatGPTTab);
-			browser.tabs.sendMessage(chatGPTTabId, {
-				action: ACTION_SUMMARIZE_PAGE,
-				payload: PageContent.parse(value),
-			} satisfies PageActionPayload);
-		});
-}
-
-async function summarizePageInClaude(info: Info, tab: Tab) {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const aiTab = await openTab("https://claude.ai/new");
-			const tabId = getTabId(aiTab);
-			browser.tabs.sendMessage(tabId, {
-				action: ACTION_SUMMARIZE_PAGE,
-				payload: PageContent.parse(value),
-			} satisfies PageActionPayload);
-		});
-}
-
-async function summarizePageInVenice(info: Info, tab: Tab) {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const aiTab = await openTab("https://venice.ai/chat");
-			const tabId = getTabId(aiTab);
-			browser.tabs.sendMessage(tabId, {
-				action: ACTION_SUMMARIZE_PAGE,
-				payload: PageContent.parse(value),
-			} satisfies PageActionPayload);
-		});
+		browser.tabs
+			.sendMessage(tabId, { action: GET_PAGE_CONTENT })
+			.then(async function handleResponse(value: unknown) {
+				const aiTab = await openTab(aiToolUrl);
+				const tabId = getTabId(aiTab);
+				browser.tabs.sendMessage(tabId, {
+					action: ACTION_SUMMARIZE_PAGE,
+					payload: PageContent.parse(value),
+				} satisfies PageActionPayload);
+			});
+	};
 }
 
 function buildSummarizeYoutube(aiToolUrl: string) {
