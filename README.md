@@ -1,6 +1,6 @@
 # Summarize Web (Web Extension)
 
-A browser web extension that allows you to quickly summarize web content using Perplexity and ChatGPT.
+A browser web extension that allows you to quickly summarize web content using Venice.ai, ChatGPT and Claude.
 
 https://github.com/user-attachments/assets/69ddcb9f-62d1-4188-8d85-ab7b838bb132
 
@@ -9,12 +9,10 @@ https://github.com/user-attachments/assets/69ddcb9f-62d1-4188-8d85-ab7b838bb132
 - 🖱️ Right-click any webpage to summarize instantly
 - 📺 Summarize YouTube videos and articles  
 - ✂️ Summarize selected text snippets
-- 🤖 Choose between Perplexity[^1] or ChatGPT
+- 🤖 Choose between Venice.ai, ChatGPT or Claude
 - 🆓 Completely free - no ads, no tracking
-- 🌐 Works on Chrome and Firefox
+- 🌐 Works in Chrome and Firefox
 
 ## Installation
 
 You can install the extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/summarize-web/iigkbidioiajlfkngjclfmdagnchbhcp).
-
-[^1]: Perplexity Pro is required for file uploads.

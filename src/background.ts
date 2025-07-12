@@ -18,12 +18,6 @@ browser.runtime.onInstalled.addListener(handleInstallation);
 function handleInstallation() {
 	// Page context menu items
 	browser.contextMenus.create({
-		id: "summarize-page-in-perplexity",
-		title: "Summarize page in Perplexity",
-		contexts: ["page"],
-	});
-
-	browser.contextMenus.create({
 		id: "summarize-page-in-chatgpt",
 		title: "Summarize page in ChatGPT",
 		contexts: ["page"],
@@ -42,13 +36,6 @@ function handleInstallation() {
 	});
 
 	// Youtube context menu items
-	browser.contextMenus.create({
-		id: "summarize-youtube-in-perplexity",
-		title: "Summarize Youtube in Perplexity",
-		contexts: ["page"],
-		documentUrlPatterns: ["https://www.youtube.com/*"],
-	});
-
 	browser.contextMenus.create({
 		id: "summarize-youtube-in-chatgpt",
 		title: "Summarize Youtube in ChatGPT",
@@ -72,12 +59,6 @@ function handleInstallation() {
 
 	// Selection context menu items
 	browser.contextMenus.create({
-		id: "summarize-selection-in-perplexity",
-		title: "Summarize selection in Perplexity",
-		contexts: ["selection"],
-	});
-
-	browser.contextMenus.create({
 		id: "summarize-selection-in-chatgpt",
 		title: "Summarize selection in ChatGPT",
 		contexts: ["selection"],
@@ -89,13 +70,10 @@ type Tab = browser.Tabs.Tab;
 type ContextMenuHandler = (info: Info, tab: Tab) => Promise<unknown>;
 
 const actionMap = new Map<string, ContextMenuHandler>([
-	["summarize-selection-in-perplexity", summarizeSelectionInPerplexity],
 	["summarize-selection-in-chatgpt", summarizeSelectionInChatGPT],
-	["summarize-page-in-perplexity", summarizePageInPerplexity],
 	["summarize-page-in-chatgpt", summarizePageInChatGPT],
 	["summarize-page-in-claude", summarizePageInClaude],
 	["summarize-page-in-venice", summarizePageInVenice],
-	["summarize-youtube-in-perplexity", summarizeYoutubeInPerplexity],
 	["summarize-youtube-in-chatgpt", summarizeYoutubeInChatGPT],
 	["summarize-youtube-in-claude", summarizeYoutubeInClaude],
 	["summarize-youtube-in-venice", summarizeYoutubeInVenice],
@@ -110,30 +88,6 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
 	const handler = actionMap.get(menuItemId);
 	handler?.(info, tab);
 });
-
-async function summarizePageInPerplexity(info: Info, tab: Tab) {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_PAGE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const perplexityTab = await openTab("https://www.perplexity.ai/");
-			const perplexityTabId = getTabId(perplexityTab);
-			browser.tabs.sendMessage(perplexityTabId, {
-				action: ACTION_SUMMARIZE_PAGE,
-				payload: PageContent.parse(value),
-			} satisfies PageActionPayload);
-		});
-}
-
-async function summarizeSelectionInPerplexity(info: Info, tab: Tab) {
-	const selectedText = info.selectionText ?? "";
-	const perplexityTab = await openTab("https://perplexity.ai");
-	browser.tabs.sendMessage(getTabId(perplexityTab), {
-		action: ACTION_SUMMARIZE_SELECTION,
-		payload: selectedText,
-	} satisfies SummarizeSelectionActionPayload);
-}
 
 async function summarizeSelectionInChatGPT(info: Info, tab: Tab) {
 	const selectedText = info.selectionText ?? "";
@@ -186,21 +140,6 @@ async function summarizePageInVenice(info: Info, tab: Tab) {
 				action: ACTION_SUMMARIZE_PAGE,
 				payload: PageContent.parse(value),
 			} satisfies PageActionPayload);
-		});
-}
-
-async function summarizeYoutubeInPerplexity(info: Info, tab: Tab) {
-	const tabId = getTabId(tab);
-
-	browser.tabs
-		.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
-		.then(async function handleResponse(value: unknown) {
-			const perplexityTab = await openTab("https://www.perplexity.ai/");
-			const perplexityTabId = getTabId(perplexityTab);
-			browser.tabs.sendMessage(perplexityTabId, {
-				action: ACTION_SUMMARIZE_YOUTUBE,
-				payload: YoutubeContent.parse(value),
-			} satisfies YoutubeActionPayload);
 		});
 }
 

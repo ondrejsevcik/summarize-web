@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Summarize Web",
   "version": "1.0.1",
-  "description": "Summarize web content using Perplexity and ChatGPT.",
+  "description": "Summarize web content using Venice.ai and ChatGPT.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -15,10 +15,6 @@
     "scripts": ["background.ts"]
   },
   "content_scripts": [
-    {
-      "matches": ["https://www.perplexity.ai/*"],
-      "js": ["contentScript_perplexity.ts"]
-    },
     {
       "matches": ["https://chatgpt.com/*"],
       "js": ["contentScript_chatgpt.ts"]
