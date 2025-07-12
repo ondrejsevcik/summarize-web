@@ -1,9 +1,12 @@
 import { simulateFileSelection } from "./dom-utils";
 import {
+	ACTION_SUMMARIZE,
 	ACTION_SUMMARIZE_PAGE,
 	ACTION_SUMMARIZE_YOUTUBE,
 	MessageSchema,
 	PageContent,
+	type Prompt,
+	PromptSchema,
 	YoutubeContent,
 	type Page,
 	type Youtube,
@@ -16,21 +19,18 @@ browser.runtime.onMessage.addListener(handleMessage);
 function handleMessage(message: unknown) {
 	const { action, payload } = MessageSchema.parse(message);
 
-	if (action === ACTION_SUMMARIZE_PAGE) {
-		return PageContent.parseAsync(payload).then(runPageSummarization);
-	}
+	// if (action === ACTION_SUMMARIZE_PAGE) {
+	// 	return PageContent.parseAsync(payload).then(runPageSummarization);
+	// }
 
-	if (action === ACTION_SUMMARIZE_YOUTUBE) {
-		return YoutubeContent.parseAsync(payload).then(runYoutubeSummarization);
+	if (action === ACTION_SUMMARIZE) {
+		return PromptSchema.parseAsync(payload).then(runSummarization);
 	}
 }
 
-async function runPageSummarization(pageData: Page) {
-	const prompt = "Give me key ideas from the attached file.";
-	await updateEditorValue(prompt);
-
-	const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
-	await uploadFile(fileContent);
+async function runSummarization(prompt: Prompt) {
+	await updateEditorValue(prompt.promptText);
+	await uploadFile(prompt.attachment);
 	await submitButton();
 }
 
@@ -64,7 +64,9 @@ async function submitButton() {
 
 	await waitFor(() => {
 		// Wait for the submit button to be enabled
-		const button = document.querySelector<HTMLButtonElement>("[aria-label='Send prompt']");
+		const button = document.querySelector<HTMLButtonElement>(
+			"[aria-label='Send prompt']",
+		);
 		return button?.disabled === false;
 	}, oneMinuteTimeout);
 

@@ -12,7 +12,7 @@ function handleMessage(message: unknown) {
 	}
 }
 
-async function getYoutubeContent(): Promise<Youtube> {
+async function getYoutubeContent(): Promise<string> {
 	const showTranscriptBtn = await querySelectorAsync<HTMLButtonElement>(
 		'button[aria-label="Show transcript"]',
 	);
@@ -24,8 +24,9 @@ async function getYoutubeContent(): Promise<Youtube> {
 		"ytd-transcript-segment-list-renderer",
 	);
 
-	return {
-		title: document.title.replace(" - YouTube", ""),
-		transcript: transcriptNode.innerText,
-	};
+	const title = document.title.replace(" - YouTube", "");
+	const transcript = transcriptNode.innerText;
+	const attachment = `Youtube Video Title: ${title}\n\nTranscript:\n\n${transcript}`;
+
+	return attachment;
 }
