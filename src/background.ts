@@ -36,9 +36,9 @@ type Tab = browser.Tabs.Tab;
 type ContextMenuHandler = (info: Info, tab: Tab) => Promise<unknown>;
 
 const actionMap = new Map<string, ContextMenuHandler>([
-	["summarize-page-in-chatgpt", buildSummarizeContent("https://chatgpt.com")],
-	["summarize-page-in-claude", buildSummarizeContent("https://claude.ai/new")],
 	["summarize-page-in-venice", buildSummarizeContent("https://venice.ai/chat")],
+	["summarize-page-in-claude", buildSummarizeContent("https://claude.ai/new")],
+	["summarize-page-in-chatgpt", buildSummarizeContent("https://chatgpt.com")],
 ]);
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
