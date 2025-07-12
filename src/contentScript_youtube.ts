@@ -1,5 +1,5 @@
 import { querySelectorAsync } from "./utils";
-import { GET_YOUTUBE_CONTENT, MessageSchema, type Youtube } from "./types";
+import { GET_YOUTUBE_CONTENT, MessageSchema } from "./types";
 import browser from "webextension-polyfill";
 
 browser.runtime.onMessage.addListener(handleMessage);

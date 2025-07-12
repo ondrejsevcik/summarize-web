@@ -1,14 +1,6 @@
 import {
-	ACTION_SUMMARIZE_PAGE,
-	ACTION_SUMMARIZE_YOUTUBE,
 	GET_PAGE_CONTENT,
 	GET_YOUTUBE_CONTENT,
-	PageContent,
-	YoutubeContent,
-	Content,
-	type PageActionPayload,
-	type YoutubeActionPayload,
-	ContentSchema,
 	PromptSchema,
 	type SummarizePromptPayload,
 	ACTION_SUMMARIZE,
@@ -20,46 +12,23 @@ import { PROMPT } from "./prompt";
 browser.runtime.onInstalled.addListener(handleInstallation);
 
 function handleInstallation() {
-	// Page context menu items
 	browser.contextMenus.create({
 		id: "summarize-page-in-venice",
-		title: "Summarize page in Venice",
+		title: "Summarize in Venice",
 		contexts: ["page"],
 	});
 
 	browser.contextMenus.create({
 		id: "summarize-page-in-claude",
-		title: "Summarize page in Claude",
+		title: "Summarize in Claude",
 		contexts: ["page"],
 	});
 
 	browser.contextMenus.create({
 		id: "summarize-page-in-chatgpt",
-		title: "Summarize page in ChatGPT",
+		title: "Summarize in ChatGPT",
 		contexts: ["page"],
 	});
-
-	// Youtube context menu items
-	// browser.contextMenus.create({
-	// 	id: "summarize-youtube-in-venice",
-	// 	title: "Summarize Youtube in Venice",
-	// 	contexts: ["page"],
-	// 	documentUrlPatterns: ["https://www.youtube.com/*"],
-	// });
-
-	// browser.contextMenus.create({
-	// 	id: "summarize-youtube-in-claude",
-	// 	title: "Summarize Youtube in Claude",
-	// 	contexts: ["page"],
-	// 	documentUrlPatterns: ["https://www.youtube.com/*"],
-	// });
-
-	// browser.contextMenus.create({
-	// 	id: "summarize-youtube-in-chatgpt",
-	// 	title: "Summarize Youtube in ChatGPT",
-	// 	contexts: ["page"],
-	// 	documentUrlPatterns: ["https://www.youtube.com/*"],
-	// });
 }
 
 type Info = browser.Menus.OnClickData;
@@ -70,18 +39,6 @@ const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-page-in-chatgpt", buildSummarizeContent("https://chatgpt.com")],
 	["summarize-page-in-claude", buildSummarizeContent("https://claude.ai/new")],
 	["summarize-page-in-venice", buildSummarizeContent("https://venice.ai/chat")],
-	// [
-	// 	"summarize-youtube-in-chatgpt",
-	// 	buildSummarizeYoutube("https://chatgpt.com"),
-	// ],
-	// [
-	// 	"summarize-youtube-in-claude",
-	// 	buildSummarizeYoutube("https://claude.ai/new"),
-	// ],
-	// [
-	// 	"summarize-youtube-in-venice",
-	// 	buildSummarizeYoutube("https://venice.ai/chat"),
-	// ],
 ]);
 
 browser.contextMenus.onClicked.addListener((info, tab) => {
@@ -123,20 +80,3 @@ function buildSummarizeContent(aiToolUrl: string) {
 		});
 	};
 }
-
-// function buildSummarizeYoutube(aiToolUrl: string) {
-// 	return async function summarizeYoutube(info: Info, tab: Tab) {
-// 		const tabId = getTabId(tab);
-
-// 		browser.tabs
-// 			.sendMessage(tabId, { action: GET_YOUTUBE_CONTENT })
-// 			.then(async function handleResponse(value: unknown) {
-// 				const aiTab = await openTab(aiToolUrl);
-// 				const tabId = getTabId(aiTab);
-// 				browser.tabs.sendMessage(tabId, {
-// 					action: ACTION_SUMMARIZE_YOUTUBE,
-// 					payload: YoutubeContent.parse(value),
-// 				} satisfies YoutubeActionPayload);
-// 			});
-// 	};
-// }

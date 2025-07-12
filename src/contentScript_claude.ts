@@ -1,12 +1,9 @@
 import { simulateFileSelection } from "./dom-utils";
 import {
-	ACTION_SUMMARIZE_PAGE,
-	ACTION_SUMMARIZE_YOUTUBE,
+	ACTION_SUMMARIZE,
 	MessageSchema,
-	PageContent,
-	YoutubeContent,
-	type Page,
-	type Youtube,
+	type Prompt,
+	PromptSchema,
 } from "./types";
 import { querySelectorAsync, waitFor } from "./utils";
 import browser from "webextension-polyfill";
@@ -16,30 +13,14 @@ browser.runtime.onMessage.addListener(handleMessage);
 function handleMessage(message: unknown) {
 	const { action, payload } = MessageSchema.parse(message);
 
-	if (action === ACTION_SUMMARIZE_PAGE) {
-		return PageContent.parseAsync(payload).then(runPageSummarization);
-	}
-
-	if (action === ACTION_SUMMARIZE_YOUTUBE) {
-		return YoutubeContent.parseAsync(payload).then(runYoutubeSummarization);
+	if (action === ACTION_SUMMARIZE) {
+		return PromptSchema.parseAsync(payload).then(runSummarization);
 	}
 }
 
-async function runPageSummarization(pageData: Page) {
-	const prompt = "Give me key ideas from the attached file.";
-	await updateEditorValue(prompt);
-
-	const fileContent = `Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
-	await uploadFile(fileContent);
-	await submitButton();
-}
-
-async function runYoutubeSummarization(youtubeData: Youtube) {
-	const prompt = "Give me key ideas from the attached YouTube transcript.";
-	await updateEditorValue(prompt);
-
-	const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
-	await uploadFile(fileContent);
+async function runSummarization(prompt: Prompt) {
+	await updateEditorValue(prompt.promptText);
+	await uploadFile(prompt.attachment);
 	await submitButton();
 }
 
@@ -54,8 +35,9 @@ async function updateEditorValue(value: string) {
 }
 
 async function uploadFile(fileContent: string) {
-	const inputElement =
-		await querySelectorAsync<HTMLInputElement>("input[aria-label='Upload files']");
+	const inputElement = await querySelectorAsync<HTMLInputElement>(
+		"input[aria-label='Upload files']",
+	);
 	simulateFileSelection(inputElement, fileContent, "content.txt", "text/plain");
 }
 
@@ -64,7 +46,9 @@ async function submitButton() {
 
 	await waitFor(() => {
 		// Wait for the submit button to be enabled
-		const button = document.querySelector<HTMLButtonElement>("[aria-label='Send message']");
+		const button = document.querySelector<HTMLButtonElement>(
+			"[aria-label='Send message']",
+		);
 		return button?.disabled === false;
 	}, oneMinuteTimeout);
 

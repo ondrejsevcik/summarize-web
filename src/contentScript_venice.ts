@@ -1,15 +1,6 @@
 import { simulateFileSelection } from "./dom-utils";
-import { PROMPT } from "./prompt";
 import {
-	ACTION_SUMMARIZE_PAGE,
-	ACTION_SUMMARIZE_YOUTUBE,
 	MessageSchema,
-	ContentSchema,
-	PageContent,
-	YoutubeContent,
-	type Content,
-	type Page,
-	type Youtube,
 	type Prompt,
 	PromptSchema,
 	ACTION_SUMMARIZE,
@@ -22,39 +13,14 @@ browser.runtime.onMessage.addListener(handleMessage);
 function handleMessage(message: unknown) {
 	const { action, payload } = MessageSchema.parse(message);
 
-	if (action === ACTION_SUMMARIZE_PAGE) {
-		return PageContent.parseAsync(payload).then(runPageSummarization);
-	}
-
-	if (action === ACTION_SUMMARIZE_YOUTUBE) {
-		return YoutubeContent.parseAsync(payload).then(runYoutubeSummarization);
-	}
-
 	if (action === ACTION_SUMMARIZE) {
-		return PromptSchema.parseAsync(payload).then(runContentSummarization);
+		return PromptSchema.parseAsync(payload).then(runSummarization);
 	}
 }
 
-async function runContentSummarization(prompt: Prompt) {
+async function runSummarization(prompt: Prompt) {
 	await updateEditorValue(prompt.promptText);
 	await uploadFile(prompt.attachment);
-	await submitButton();
-}
-
-async function runPageSummarization(pageData: Page) {
-	await updateEditorValue(PROMPT);
-
-	const fileContent = `Page Title: ${pageData.title}\n\nContent:\n${pageData.textContent}`;
-	await uploadFile(fileContent);
-	await submitButton();
-}
-
-async function runYoutubeSummarization(youtubeData: Youtube) {
-	// const prompt = "Give me key ideas from the attached YouTube transcript.";
-	await updateEditorValue(PROMPT);
-
-	const fileContent = `Youtube Video Title: ${youtubeData.title}\n\nTranscript:\n${youtubeData.transcript}`;
-	await uploadFile(fileContent);
 	await submitButton();
 }
 

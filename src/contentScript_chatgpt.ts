@@ -1,15 +1,9 @@
 import { simulateFileSelection } from "./dom-utils";
 import {
 	ACTION_SUMMARIZE,
-	ACTION_SUMMARIZE_PAGE,
-	ACTION_SUMMARIZE_YOUTUBE,
 	MessageSchema,
-	PageContent,
 	type Prompt,
 	PromptSchema,
-	YoutubeContent,
-	type Page,
-	type Youtube,
 } from "./types";
 import { querySelectorAsync, waitFor } from "./utils";
 import browser from "webextension-polyfill";
@@ -19,10 +13,6 @@ browser.runtime.onMessage.addListener(handleMessage);
 function handleMessage(message: unknown) {
 	const { action, payload } = MessageSchema.parse(message);
 
-	// if (action === ACTION_SUMMARIZE_PAGE) {
-	// 	return PageContent.parseAsync(payload).then(runPageSummarization);
-	// }
-
 	if (action === ACTION_SUMMARIZE) {
 		return PromptSchema.parseAsync(payload).then(runSummarization);
 	}
@@ -31,15 +21,6 @@ function handleMessage(message: unknown) {
 async function runSummarization(prompt: Prompt) {
 	await updateEditorValue(prompt.promptText);
 	await uploadFile(prompt.attachment);
-	await submitButton();
-}
-
-async function runYoutubeSummarization(youtubeData: Youtube) {
-	const prompt = "Give me key ideas from the attached YouTube transcript.";
-	await updateEditorValue(prompt);
-
-	const fileContent = `Title: ${youtubeData.title}\n\nContent:\n${youtubeData.transcript}`;
-	await uploadFile(fileContent);
 	await submitButton();
 }
 
