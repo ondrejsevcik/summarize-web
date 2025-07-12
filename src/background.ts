@@ -16,6 +16,7 @@ import { getTabId, openTab } from "./utils";
 browser.runtime.onInstalled.addListener(handleInstallation);
 
 function handleInstallation() {
+	// Page context menu items
 	browser.contextMenus.create({
 		id: "summarize-page-in-perplexity",
 		title: "Summarize page in Perplexity",
@@ -40,6 +41,7 @@ function handleInstallation() {
 		contexts: ["page"],
 	});
 
+	// Youtube context menu items
 	browser.contextMenus.create({
 		id: "summarize-youtube-in-perplexity",
 		title: "Summarize Youtube in Perplexity",
@@ -68,6 +70,7 @@ function handleInstallation() {
 		documentUrlPatterns: ["https://www.youtube.com/*"],
 	});
 
+	// Selection context menu items
 	browser.contextMenus.create({
 		id: "summarize-selection-in-perplexity",
 		title: "Summarize selection in Perplexity",
