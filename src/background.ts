@@ -87,16 +87,13 @@ async function downloadContentAsTxtFile(info: Info, tab: Tab): Promise<void> {
 				throw new Error("Expected content to be a string");
 			}
 
-			const blob = new Blob([value], { type: "text/plain" });
-			const url = URL.createObjectURL(blob);
+			const dataUrl = `data:text/plain;charset=utf-8,${encodeURIComponent(value)}`;
 			const filename = `content-${Date.now()}.txt`;
 
 			await browser.downloads.download({
-				url,
+				url: dataUrl,
 				filename,
-				saveAs: true,
+				saveAs: false,
 			});
-
-			URL.revokeObjectURL(url);
 		});
 }
