@@ -2,7 +2,7 @@
 	"manifest_version": 3,
 	"name": "Summarize Web",
 	"version": "1.0.1",
-	"description": "Summarize web content using Venice.ai, ChatGPT and Claude.",
+	"description": "Summarize web content using Venice.ai, ChatGPT, Claude and Mistral.",
 	"icons": {
 		"16": "icons/icon16.png",
 		"48": "icons/icon48.png",
@@ -26,6 +26,10 @@
 		{
 			"matches": ["https://chatgpt.com/*"],
 			"js": ["contentScript_chatgpt.ts"]
+		},
+		{
+			"matches": ["https://chat.mistral.ai/*"],
+			"js": ["contentScript_mistral.ts"]
 		},
 		{
 			"matches": ["http://*/*", "https://*/*"],

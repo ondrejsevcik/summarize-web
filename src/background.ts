@@ -30,6 +30,12 @@ function handleInstallation() {
 	});
 
 	browser.contextMenus.create({
+		id: "summarize-page-in-mistral",
+		title: "Summarize in Mistral",
+		contexts: ["page"],
+	});
+
+	browser.contextMenus.create({
 		id: "download-content",
 		title: "Download Content as TXT file",
 		contexts: ["page"],
@@ -44,6 +50,7 @@ const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-page-in-venice", buildSummarizeContent("https://venice.ai/chat")],
 	["summarize-page-in-claude", buildSummarizeContent("https://claude.ai/new")],
 	["summarize-page-in-chatgpt", buildSummarizeContent("https://chatgpt.com")],
+	["summarize-page-in-mistral", buildSummarizeContent("https://chat.mistral.ai")],
 	["download-content", downloadContentAsTxtFile],
 ]);
 

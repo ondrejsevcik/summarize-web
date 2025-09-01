@@ -1,6 +1,6 @@
 # Summarize Web (Web Extension)
 
-A browser web extension that allows you to quickly summarize web content using Venice.ai, ChatGPT and Claude.
+A browser web extension that allows you to quickly summarize web content using Venice.ai, ChatGPT, Claude and Mistral.
 
 https://github.com/user-attachments/assets/69ddcb9f-62d1-4188-8d85-ab7b838bb132
 
@@ -9,7 +9,7 @@ https://github.com/user-attachments/assets/69ddcb9f-62d1-4188-8d85-ab7b838bb132
 - 🖱️ Right-click any webpage to summarize instantly
 - 📺 Summarize YouTube videos and articles  
 - ✂️ Summarize selected text snippets
-- 🤖 Choose between Venice.ai, ChatGPT or Claude
+- 🤖 Choose between Venice.ai, ChatGPT, Claude or Mistral
 - 🆓 Completely free - no ads, no tracking
 - 🌐 Works in Chrome and Firefox
 
