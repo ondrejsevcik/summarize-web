@@ -20,10 +20,10 @@ function handleMessage(message: unknown) {
 
 async function runSummarization(prompt: Prompt) {
 	// Include attachment content directly in the prompt text since file upload doesn't work
-	const fullPrompt = prompt.attachment 
+	const fullPrompt = prompt.attachment
 		? `${prompt.promptText}\n\n--- Content to analyze ---\n${prompt.attachment}`
 		: prompt.promptText;
-	
+
 	await updateEditorValue(fullPrompt);
 	await submitButton();
 }
@@ -35,24 +35,24 @@ async function updateEditorValue(value: string) {
 	// ProseMirror uses rich text editing with DOM structure, not plain text
 	// Setting textContent would flatten everything into one line, ignoring line breaks
 	// We need to create proper paragraph elements for each line to preserve formatting
-	
+
 	// Clear the editor first
-	editorElement.innerHTML = '';
-	
+	editorElement.innerHTML = "";
+
 	// Split the text by line breaks and create paragraph elements
-	const lines = value.split('\n');
+	const lines = value.split("\n");
 	lines.forEach((line, index) => {
-		const p = document.createElement('p');
-		
+		const p = document.createElement("p");
+
 		// Handle empty lines - ProseMirror needs a <br> element to render empty paragraphs
-		if (line.trim() === '') {
-			const br = document.createElement('br');
-			br.className = 'ProseMirror-trailingBreak';
+		if (line.trim() === "") {
+			const br = document.createElement("br");
+			br.className = "ProseMirror-trailingBreak";
 			p.appendChild(br);
 		} else {
 			p.textContent = line;
 		}
-		
+
 		editorElement.appendChild(p);
 	});
 

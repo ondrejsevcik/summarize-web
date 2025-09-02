@@ -1,25 +1,26 @@
 {
-  "name": "summarize-web",
-  "private": true,
-  "version": "1.0.0",
-  "type": "module",
-  "main": "background.js",
-  "scripts": {
-    "dev": "vite dev",
-    "build": "vite build"
-  },
-  "dependencies": {
-    "@mozilla/readability": "^0.6.0",
-    "vite": "^6.3.5",
-    "vite-plugin-web-extension": "^4.4.3",
-    "zod": "^3.25.55"
-  },
-  "engines": {
-    "node": ">=22.14.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@types/webextension-polyfill": "^0.12.3",
-    "webextension-polyfill": "^0.12.0"
-  }
+	"name": "summarize-web",
+	"private": true,
+	"version": "1.0.0",
+	"type": "module",
+	"main": "background.js",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"format": "biome format --write ."
+	},
+	"dependencies": {
+		"@mozilla/readability": "^0.6.0",
+		"vite": "^6.3.5",
+		"vite-plugin-web-extension": "^4.4.3",
+		"zod": "^3.25.55"
+	},
+	"engines": {
+		"node": ">=22.14.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@types/webextension-polyfill": "^0.12.3",
+		"webextension-polyfill": "^0.12.0"
+	}
 }
