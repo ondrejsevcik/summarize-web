@@ -1,22 +1,20 @@
-import zod from "zod";
+import { z } from "zod";
 
-export const MessageSchema = zod.object({
-	action: zod.string(),
-	payload: zod.unknown(),
+export const MessageSchema = z.object({
+	action: z.string(),
+	payload: z.unknown(),
 });
 
-export type Message = zod.infer<typeof MessageSchema>;
+export type Message = z.infer<typeof MessageSchema>;
 
-export const PromptSchema = zod.object({
-	promptText: zod
+export const PromptSchema = z.object({
+	promptText: z
 		.string()
 		.min(1, "Prompt text must be at least 1 character long"),
-	attachment: zod
-		.string()
-		.min(1, "Attachment must be at least 1 character long"),
+	attachment: z.string().min(1, "Attachment must be at least 1 character long"),
 });
 
-export type Prompt = zod.infer<typeof PromptSchema>;
+export type Prompt = z.infer<typeof PromptSchema>;
 
 export const GET_CONTENT = "GET_CONTENT";
 export const ACTION_SUMMARIZE = "ACTION_SUMMARIZE";
