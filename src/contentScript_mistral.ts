@@ -1,4 +1,4 @@
-import { simulateFileSelection } from "./dom-utils";
+import browser from "webextension-polyfill";
 import {
 	ACTION_SUMMARIZE,
 	MessageSchema,
@@ -6,7 +6,6 @@ import {
 	PromptSchema,
 } from "./types";
 import { querySelectorAsync, waitFor } from "./utils";
-import browser from "webextension-polyfill";
 
 browser.runtime.onMessage.addListener(handleMessage);
 
@@ -41,7 +40,7 @@ async function updateEditorValue(value: string) {
 
 	// Split the text by line breaks and create paragraph elements
 	const lines = value.split("\n");
-	lines.forEach((line, index) => {
+	lines.forEach((line, _index) => {
 		const p = document.createElement("p");
 
 		// Handle empty lines - ProseMirror needs a <br> element to render empty paragraphs

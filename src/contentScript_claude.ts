@@ -1,3 +1,4 @@
+import browser from "webextension-polyfill";
 import { simulateFileSelection } from "./dom-utils";
 import {
 	ACTION_SUMMARIZE,
@@ -6,7 +7,6 @@ import {
 	PromptSchema,
 } from "./types";
 import { querySelectorAsync, waitFor } from "./utils";
-import browser from "webextension-polyfill";
 
 browser.runtime.onMessage.addListener(handleMessage);
 
