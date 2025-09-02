@@ -32,4 +32,3 @@ export function simulateFileSelection(
 	const event = new Event("change", { bubbles: true });
 	inputElement.dispatchEvent(event);
 }
-

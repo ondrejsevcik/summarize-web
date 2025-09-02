@@ -1,12 +1,12 @@
+import browser from "webextension-polyfill";
+import { PROMPT } from "./prompt";
 import {
+	ACTION_SUMMARIZE,
 	GET_CONTENT,
 	PromptSchema,
 	type SummarizePromptPayload,
-	ACTION_SUMMARIZE,
 } from "./types";
-import browser from "webextension-polyfill";
 import { getTabId, openTab } from "./utils";
-import { PROMPT } from "./prompt";
 
 browser.runtime.onInstalled.addListener(handleInstallation);
 
@@ -50,7 +50,10 @@ const actionMap = new Map<string, ContextMenuHandler>([
 	["summarize-page-in-venice", buildSummarizeContent("https://venice.ai/chat")],
 	["summarize-page-in-claude", buildSummarizeContent("https://claude.ai/new")],
 	["summarize-page-in-chatgpt", buildSummarizeContent("https://chatgpt.com")],
-	["summarize-page-in-mistral", buildSummarizeContent("https://chat.mistral.ai")],
+	[
+		"summarize-page-in-mistral",
+		buildSummarizeContent("https://chat.mistral.ai"),
+	],
 	["download-content", downloadContentAsTxtFile],
 ]);
 
