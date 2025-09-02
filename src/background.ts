@@ -1,12 +1,12 @@
+import browser from "webextension-polyfill";
+import { PROMPT } from "./prompt";
 import {
+	ACTION_SUMMARIZE,
 	GET_CONTENT,
 	PromptSchema,
 	type SummarizePromptPayload,
-	ACTION_SUMMARIZE,
 } from "./types";
-import browser from "webextension-polyfill";
 import { getTabId, openTab } from "./utils";
-import { PROMPT } from "./prompt";
 
 browser.runtime.onInstalled.addListener(handleInstallation);
 
@@ -68,7 +68,7 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 function buildSummarizeContent(aiToolUrl: string) {
-	return async function summarizePage(info: Info, tab: Tab) {
+	return async function summarizePage(_info: Info, tab: Tab) {
 		const tabId = getTabId(tab);
 
 		browser.tabs
@@ -87,7 +87,7 @@ function buildSummarizeContent(aiToolUrl: string) {
 	};
 }
 
-async function downloadContentAsTxtFile(info: Info, tab: Tab): Promise<void> {
+async function downloadContentAsTxtFile(_info: Info, tab: Tab): Promise<void> {
 	const tabId = getTabId(tab);
 
 	browser.tabs

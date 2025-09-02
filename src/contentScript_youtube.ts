@@ -1,6 +1,6 @@
-import { querySelectorAsync } from "./utils";
-import { GET_CONTENT, MessageSchema } from "./types";
 import browser from "webextension-polyfill";
+import { GET_CONTENT, MessageSchema } from "./types";
+import { querySelectorAsync } from "./utils";
 
 browser.runtime.onMessage.addListener(handleMessage);
 
