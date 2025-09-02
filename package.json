@@ -6,7 +6,8 @@
 	"main": "background.js",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build"
+		"build": "vite build",
+		"format": "biome format --write ."
 	},
 	"dependencies": {
 		"@mozilla/readability": "^0.6.0",
@@ -18,7 +19,7 @@
 		"node": ">=22.14.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
+		"@biomejs/biome": "^2.2.2",
 		"@types/webextension-polyfill": "^0.12.3",
 		"webextension-polyfill": "^0.12.0"
 	}
