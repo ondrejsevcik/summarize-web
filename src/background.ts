@@ -1,12 +1,12 @@
-import browser from "webextension-polyfill";
-import { PROMPT } from "./prompt";
 import {
-	ACTION_SUMMARIZE,
 	GET_CONTENT,
 	PromptSchema,
 	type SummarizePromptPayload,
+	ACTION_SUMMARIZE,
 } from "./types";
+import browser from "webextension-polyfill";
 import { getTabId, openTab } from "./utils";
+import { PROMPT } from "./prompt";
 
 browser.runtime.onInstalled.addListener(handleInstallation);
 
