@@ -19,8 +19,12 @@ function handleMessage(message: unknown) {
 }
 
 async function runSummarization(prompt: Prompt) {
-	await updateEditorValue(prompt.promptText);
-	await uploadFile(prompt.attachment);
+	// Include attachment content directly in the prompt text since file upload doesn't work
+	const fullPrompt = prompt.attachment 
+		? `${prompt.promptText}\n\n--- Content to analyze ---\n${prompt.attachment}`
+		: prompt.promptText;
+	
+	await updateEditorValue(fullPrompt);
 	await submitButton();
 }
 
@@ -28,16 +32,33 @@ async function updateEditorValue(value: string) {
 	const editorElement =
 		await querySelectorAsync<HTMLDivElement>(".ProseMirror");
 
-	// This updates value in the ProseMirror editor
-	editorElement.textContent = value;
+	// ProseMirror uses rich text editing with DOM structure, not plain text
+	// Setting textContent would flatten everything into one line, ignoring line breaks
+	// We need to create proper paragraph elements for each line to preserve formatting
+	
+	// Clear the editor first
+	editorElement.innerHTML = '';
+	
+	// Split the text by line breaks and create paragraph elements
+	const lines = value.split('\n');
+	lines.forEach((line, index) => {
+		const p = document.createElement('p');
+		
+		// Handle empty lines - ProseMirror needs a <br> element to render empty paragraphs
+		if (line.trim() === '') {
+			const br = document.createElement('br');
+			br.className = 'ProseMirror-trailingBreak';
+			p.appendChild(br);
+		} else {
+			p.textContent = line;
+		}
+		
+		editorElement.appendChild(p);
+	});
+
+	// Trigger input event to notify ProseMirror of the change
 	const event = new Event("input", { bubbles: true, cancelable: true });
 	editorElement.dispatchEvent(event);
-}
-
-async function uploadFile(fileContent: string) {
-	const inputElement =
-		await querySelectorAsync<HTMLInputElement>("input[type=file]");
-	simulateFileSelection(inputElement, fileContent, "content.txt", "text/plain");
 }
 
 async function submitButton() {
