@@ -152,6 +152,4 @@ After `npm run build`, verify these files exist in `dist/`:
 
 ## Development Dependencies
 - @biomejs/biome: Code formatting and linting (v2.2.2+)
-- @types/webextension-polyfill: TypeScript definitions
-- webextension-polyfill: Cross-browser extension API compatibility
 - webextension-polyfill: Cross-browser extension API compatibility
