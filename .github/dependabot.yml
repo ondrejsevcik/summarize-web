@@ -1,0 +1,64 @@
+# Dependabot configuration for summarize-web
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Configure updates for npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      # Note: GitHub Dependabot doesn't support quarterly intervals directly.
+      # Using monthly as the closest available option. The grouping configuration
+      # helps batch related updates together to reduce review overhead.
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    # Group updates to reduce noise and make reviews easier
+    groups:
+      # Build and bundling tools
+      build-tools:
+        patterns:
+          - "vite"
+          - "vite-plugin-*"
+        exclude-patterns:
+          - "@types/*"
+      # Development and tooling dependencies  
+      dev-tools:
+        patterns:
+          - "@biomejs/*"
+          - "@types/*"
+          - "*eslint*"
+          - "*prettier*"
+          - "*jest*"
+          - "*vitest*"
+          - "*testing*"
+      # Runtime and core dependencies
+      runtime-deps:
+        patterns:
+          - "@mozilla/*"
+          - "zod"
+          - "webextension-polyfill"
+        exclude-patterns:
+          - "@types/*"
+    # Limit the number of open pull requests to avoid overwhelming maintainers
+    open-pull-requests-limit: 5
+    # Automatically rebase PRs to keep them up to date
+    rebase-strategy: "auto"
+    # Add reviewers and assignees (customize as needed)
+    # reviewers:
+    #   - "maintainer-username"
+    # assignees:
+    #   - "maintainer-username"
+    # Configure commit message prefix for easier identification
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Add labels to Dependabot PRs for better organization
+    labels:
+      - "dependencies"
+      - "automated"
+    # Allow Dependabot to update both direct and indirect dependencies
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
