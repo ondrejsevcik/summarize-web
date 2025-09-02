@@ -1,0 +1,28 @@
+# Dependabot configuration for summarize-web
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Configure updates for npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "quarterly"
+    groups:
+      # Build and bundling tools
+      build-tools:
+        patterns:
+          - "vite"
+          - "vite-plugin-*"
+      # Development and tooling dependencies  
+      dev-tools:
+        patterns:
+          - "@biomejs/*"
+          - "@types/*"
+          - "*eslint*"
+          - "*prettier*"
+          - "*jest*"
+          - "*vitest*"
+          - "*testing*"
+    # Limit the number of open pull requests to avoid overwhelming maintainers
+    open-pull-requests-limit: 5
