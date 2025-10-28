@@ -25,7 +25,12 @@ async function getYoutubeContent(): Promise<string> {
 	);
 
 	const title = document.title.replace(" - YouTube", "");
-	const transcript = transcriptNode.innerText;
+	const transcriptSegments = transcriptNode.querySelectorAll(".segment-text");
+	// Extract only text content (excluding timestamps) and normalize whitespace for better AI summarization
+	const transcript = Array.from(transcriptSegments)
+		.map((segment) => segment.textContent?.replace(/\s+/g, " ").trim())
+		.filter(Boolean)
+		.join(" ");
 	const attachment = `Youtube Video Title: ${title}\n\nTranscript:\n\n${transcript}`;
 
 	return attachment;
