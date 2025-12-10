@@ -7,7 +7,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "quarterly"
+      interval: "monthly"
     groups:
       # Build and bundling tools
       build-tools:
@@ -25,4 +25,4 @@ updates:
           - "*vitest*"
           - "*testing*"
     # Limit the number of open pull requests to avoid overwhelming maintainers
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 1
